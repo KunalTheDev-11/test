@@ -3,608 +3,3072 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Happy Birthday</title>
+<title>PixelForge — Pixel Art Studio</title>
 <style>
+/* ============================================================
+   RESET & TOKENS
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --deep:#0a0108; --panel:#1a0a14; --gold:#ffd700; --rose:#ff9ec4;
-  --cream:#fff5f8; --line:#2a1a24;
+  --bg:#0a0a14;
+  --surface:#14141f;
+  --surface-2:#1a1a28;
+  --surface-3:#232336;
+  --border:#2a2a3e;
+  --border-bright:#3a3a52;
+  --text:#e0e0f0;
+  --text-dim:#a0a0c0;
+  --muted:#6060a0;
+  --primary:#00e5ff;
+  --secondary:#ff00aa;
+  --accent:#a855f7;
+  --success:#00ff88;
+  --warning:#ffaa00;
+  --danger:#ff0055;
+  --shadow-pixel:4px 4px 0 rgba(0,0,0,0.4);
+  --shadow-glow:0 0 24px rgba(0,229,255,0.3);
+  --font-mono:'SF Mono','Cascadia Code','Roboto Mono',Consolas,monospace;
+  --font-sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  color-scheme:dark;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{
-  height:100%;
-  background:radial-gradient(ellipse at 50% 0%,#1f0a1a 0%,var(--deep) 70%);
-  color:var(--cream);
-  font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  overflow:hidden;
-  padding-top:env(safe-area-inset-top,0);
-  padding-bottom:env(safe-area-inset-bottom,0);
+html,body{height:100%;overflow:hidden}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font:14px/1.5 var(--font-sans);
+  -webkit-font-smoothing:antialiased;
 }
-#app{
-  height:100%;
-  display:flex;flex-direction:column;align-items:center;
-  padding:20px 16px;gap:14px;
-  position:relative;z-index:2;
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,textarea,select{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+.hidden{display:none !important}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--border-bright)}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+.pixel-border{
+  box-shadow:
+    -2px 0 0 0 var(--primary),
+    2px 0 0 0 var(--primary),
+    0 -2px 0 0 var(--primary),
+    0 2px 0 0 var(--primary);
 }
-header{text-align:center;flex-shrink:0;animation:fadeIn 1.2s ease-out}
-@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
-header h1{
-  font:italic 400 clamp(30px,5.5vw,52px)/1.1 Georgia,"Times New Roman",serif;
-  background:linear-gradient(180deg,var(--gold) 0%,var(--rose) 100%);
-  -webkit-background-clip:text;background-clip:text;
-  color:transparent;letter-spacing:0.02em;margin-bottom:4px;
+.btn-pixel{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 20px;
+  background:var(--surface-2);
+  border:1px solid var(--border-bright);
+  color:var(--text);
+  font:600 13px/1 var(--font-mono);
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  border-radius:2px;
+  transition:all 0.12s;
+  position:relative;
+  box-shadow:var(--shadow-pixel);
+  cursor:pointer;
 }
-header .sub{
-  font-size:11px;letter-spacing:0.35em;text-transform:uppercase;
-  color:var(--rose);opacity:0.7;
+.btn-pixel:hover{
+  background:var(--surface-3);
+  border-color:var(--primary);
+  color:var(--primary);
+  transform:translate(-1px,-1px);
+  box-shadow:5px 5px 0 rgba(0,0,0,0.4);
 }
-#stage{
-  flex:1;min-height:0;width:100%;
-  display:flex;align-items:center;justify-content:center;
+.btn-pixel:active{
+  transform:translate(2px,2px);
+  box-shadow:1px 1px 0 rgba(0,0,0,0.4);
+}
+.btn-pixel.primary{
+  background:var(--primary);
+  border-color:var(--primary);
+  color:var(--bg);
+}
+.btn-pixel.primary:hover{
+  background:#33eeff;
+  color:var(--bg);
+}
+.btn-pixel.secondary{
+  background:var(--secondary);
+  border-color:var(--secondary);
+  color:var(--bg);
+}
+.btn-pixel.secondary:hover{
+  background:#ff33bb;
+  color:var(--bg);
+}
+.btn-pixel.small{padding:6px 12px;font-size:11px}
+.btn-pixel.ghost{background:transparent;border-color:var(--border);box-shadow:none}
+.btn-pixel.ghost:hover{background:var(--surface-2)}
+
+/* ============================================================
+   LANDING PAGE
+   ============================================================ */
+#landing{
+  position:fixed;inset:0;
+  overflow-y:auto;overflow-x:hidden;
+  background:var(--bg);
+  scroll-behavior:smooth;
+}
+#landing::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,229,255,0.03) 1px,transparent 1px);
+  background-size:32px 32px;
+  pointer-events:none;
+  z-index:0;
+}
+.landing-inner{position:relative;z-index:1}
+
+/* Nav */
+.nav{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;gap:32px;
+  padding:16px 32px;
+  background:rgba(10,10,20,0.85);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{
+  display:flex;align-items:center;gap:10px;
+  font:700 15px/1 var(--font-mono);
+  letter-spacing:0.05em;
+  color:var(--text);
+}
+.nav-logo-icon{
+  width:28px;height:28px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  padding:2px;background:var(--surface-2);
+  border:1px solid var(--border-bright);
+  border-radius:2px;
+}
+.nav-logo-icon>div{background:var(--primary)}
+.nav-logo-icon>div:nth-child(2),
+.nav-logo-icon>div:nth-child(6){background:var(--secondary)}
+.nav-logo-icon>div:nth-child(5){background:var(--accent)}
+.nav-links{
+  display:flex;gap:24px;
+  font:500 13px/1 var(--font-mono);
+  color:var(--text-dim);
+}
+.nav-links a{
+  padding:6px 0;
+  transition:color 0.15s;
   position:relative;
 }
-#cv{
-  display:block;image-rendering:pixelated;border-radius:8px;
-  max-width:100%;max-height:100%;
-  box-shadow:0 0 80px rgba(255,158,196,0.12);
-  position:relative;z-index:1;
+.nav-links a:hover{color:var(--primary)}
+.nav-links a::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;
+  height:2px;background:var(--primary);
+  transform:scaleX(0);transition:transform 0.2s;
+  transform-origin:left;
 }
-#fx{
-  position:absolute;pointer-events:none;z-index:2;
-  left:50%;top:50%;transform:translate(-50%,-50%);
-  image-rendering:auto;
+.nav-links a:hover::after{transform:scaleX(1)}
+.nav-actions{margin-left:auto;display:flex;gap:12px;align-items:center}
+
+/* Hero */
+.hero{
+  padding:80px 32px 100px;
+  max-width:1200px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;
 }
-#controls{
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;
-  flex-shrink:0;padding:8px 16px;
-  background:rgba(26,10,20,0.7);border:1px solid var(--line);
-  border-radius:100px;backdrop-filter:blur(12px);
+.hero-text h1{
+  font:800 clamp(36px,5vw,64px)/1.05 var(--font-mono);
+  letter-spacing:-0.02em;
+  margin-bottom:24px;
 }
-.name-input{
-  background:transparent;border:none;border-bottom:1px solid var(--line);
-  color:var(--cream);font:inherit;font-style:italic;font-size:15px;
-  padding:4px 6px;outline:none;min-width:130px;max-width:170px;
-  text-align:center;transition:border-color 0.2s;
+.hero-text h1 .accent{color:var(--primary)}
+.hero-text h1 .accent2{color:var(--secondary)}
+.hero-text .lead{
+  font-size:17px;line-height:1.6;
+  color:var(--text-dim);
+  margin-bottom:32px;
+  max-width:520px;
 }
-.name-input:focus{border-bottom-color:var(--rose)}
-.name-input::placeholder{color:var(--rose);opacity:0.4}
-.btn{
-  background:transparent;border:1px solid var(--line);color:var(--cream);
-  font:inherit;font-size:13px;padding:7px 14px;border-radius:100px;
-  cursor:pointer;transition:all 0.2s;white-space:nowrap;
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap}
+.hero-meta{
+  margin-top:32px;
+  display:flex;gap:24px;
+  font:12px/1.5 var(--font-mono);
+  color:var(--muted);
 }
-.btn:hover{border-color:var(--rose);color:var(--rose);background:rgba(255,158,196,0.08)}
-.btn:active{transform:translateY(1px)}
-#dropzone{
-  position:fixed;inset:0;background:rgba(10,1,8,0.92);
-  border:2px dashed var(--rose);display:none;
-  align-items:center;justify-content:center;z-index:100;
-  font-size:22px;color:var(--rose);font-style:italic;
+.hero-meta div{display:flex;align-items:center;gap:6px}
+.hero-meta .dot{
+  width:6px;height:6px;border-radius:50%;background:var(--success);
+  box-shadow:0 0 8px var(--success);
+  animation:pulse 2s ease-in-out infinite;
 }
-#dropzone.show{display:flex}
-#message{
-  position:fixed;bottom:90px;left:50%;
-  transform:translateX(-50%) translateY(20px);
-  background:var(--panel);border:1px solid var(--rose);
-  padding:8px 20px;border-radius:100px;color:var(--rose);font-size:12px;
-  opacity:0;transition:all 0.3s;pointer-events:none;z-index:50;
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+.hero-demo{
+  position:relative;
+  aspect-ratio:1;
+  max-width:520px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:4px;
+  box-shadow:var(--shadow-pixel),var(--shadow-glow);
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
 }
-#message.show{opacity:1;transform:translateX(-50%) translateY(0)}
-input[type=file]{display:none}
-@media (max-width:600px){
-  #app{padding:12px 10px;gap:10px}
-  #controls{padding:6px 12px;gap:8px}
-  .btn{padding:6px 12px;font-size:12px}
-  .name-input{font-size:13px;min-width:100px}
+.hero-demo canvas{
+  width:100%;height:100%;
+  image-rendering:pixelated;
+  display:block;
+}
+.hero-demo .demo-label{
+  position:absolute;top:12px;left:12px;
+  padding:4px 8px;
+  background:rgba(0,0,0,0.6);
+  border:1px solid var(--border-bright);
+  font:10px/1 var(--font-mono);
+  color:var(--text-dim);
+  text-transform:uppercase;
+  letter-spacing:0.1em;
+  border-radius:2px;
+}
+.hero-demo .demo-label::before{
+  content:'';display:inline-block;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--success);
+  margin-right:6px;vertical-align:middle;
+  animation:pulse 2s ease-in-out infinite;
+}
+
+/* Sections */
+.section{padding:80px 32px;max-width:1200px;margin:0 auto}
+.section-header{text-align:center;margin-bottom:56px}
+.section-eyebrow{
+  font:600 12px/1 var(--font-mono);
+  text-transform:uppercase;letter-spacing:0.15em;
+  color:var(--primary);
+  margin-bottom:16px;
+}
+.section-header h2{
+  font:800 clamp(28px,4vw,44px)/1.1 var(--font-mono);
+  letter-spacing:-0.01em;
+  margin-bottom:16px;
+}
+.section-header p{
+  font-size:16px;color:var(--text-dim);
+  max-width:600px;margin:0 auto;
+}
+
+/* Social proof */
+.social-proof{
+  padding:24px 32px;
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  text-align:center;
+}
+.social-proof p{
+  font:12px/1 var(--font-mono);
+  text-transform:uppercase;letter-spacing:0.1em;
+  color:var(--muted);margin-bottom:16px;
+}
+.social-proof .logos{
+  display:flex;gap:48px;justify-content:center;align-items:center;
+  flex-wrap:wrap;
+  font:700 15px/1 var(--font-mono);
+  color:var(--text-dim);
+  opacity:0.6;
+}
+.social-proof .logos span{transition:opacity 0.2s}
+.social-proof .logos span:hover{opacity:1}
+
+/* Features */
+.features-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:20px;
+}
+.feature-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:28px;
+  transition:all 0.2s;
+  position:relative;
+  overflow:hidden;
+}
+.feature-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--primary),var(--secondary));
+  transform:scaleX(0);transition:transform 0.3s;
+  transform-origin:left;
+}
+.feature-card:hover{
+  border-color:var(--border-bright);
+  transform:translateY(-2px);
+  box-shadow:var(--shadow-pixel);
+}
+.feature-card:hover::before{transform:scaleX(1)}
+.feature-icon{
+  width:48px;height:48px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface-3);
+  border:1px solid var(--border-bright);
+  border-radius:2px;
+  font-size:22px;
+  margin-bottom:20px;
+  color:var(--primary);
+}
+.feature-card h3{
+  font:700 15px/1.3 var(--font-mono);
+  letter-spacing:0.02em;
+  margin-bottom:10px;
+}
+.feature-card p{
+  font-size:14px;color:var(--text-dim);line-height:1.6;
+}
+
+/* Pricing */
+.pricing-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:20px;
+}
+.pricing-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:32px;
+  position:relative;
+  transition:all 0.2s;
+}
+.pricing-card.featured{
+  border-color:var(--primary);
+  box-shadow:var(--shadow-pixel),var(--shadow-glow);
+}
+.pricing-badge{
+  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  padding:4px 12px;
+  background:var(--primary);color:var(--bg);
+  font:700 10px/1 var(--font-mono);
+  text-transform:uppercase;letter-spacing:0.1em;
+  border-radius:2px;
+}
+.pricing-card h3{
+  font:700 15px/1 var(--font-mono);
+  text-transform:uppercase;letter-spacing:0.08em;
+  margin-bottom:16px;
+}
+.pricing-price{
+  display:flex;align-items:baseline;gap:6px;
+  margin-bottom:24px;
+}
+.pricing-price .amount{
+  font:800 40px/1 var(--font-mono);
+  letter-spacing:-0.02em;
+}
+.pricing-price .period{
+  font:13px/1 var(--font-mono);
+  color:var(--muted);
+}
+.pricing-features{
+  list-style:none;
+  margin-bottom:28px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.pricing-features li{
+  font-size:14px;color:var(--text-dim);
+  display:flex;align-items:flex-start;gap:8px;
+  line-height:1.5;
+}
+.pricing-features li::before{
+  content:'▸';color:var(--primary);
+  font-family:var(--font-mono);flex-shrink:0;
+}
+.pricing-card .btn-pixel{width:100%;justify-content:center}
+
+/* Testimonials */
+.testimonials-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:20px;
+}
+.testimonial{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:28px;
+  transition:border-color 0.2s;
+}
+.testimonial:hover{border-color:var(--border-bright)}
+.testimonial-quote{
+  font:italic 15px/1.6 Georgia,serif;
+  color:var(--text);
+  margin-bottom:20px;
+}
+.testimonial-author{
+  display:flex;align-items:center;gap:12px;
+}
+.testimonial-avatar{
+  width:40px;height:40px;
+  border-radius:2px;
+  border:1px solid var(--border-bright);
+  background:var(--surface-3);
+  display:flex;align-items:center;justify-content:center;
+  font:700 14px/1 var(--font-mono);
+  color:var(--primary);
+}
+.testimonial-info{display:flex;flex-direction:column;gap:2px}
+.testimonial-name{font:600 13px/1 var(--font-mono)}
+.testimonial-role{font:12px/1 var(--font-mono);color:var(--muted)}
+
+/* FAQ */
+.faq-list{max-width:800px;margin:0 auto}
+.faq-item{
+  border:1px solid var(--border);
+  border-radius:4px;
+  margin-bottom:12px;
+  background:var(--surface);
+  overflow:hidden;
+  transition:border-color 0.2s;
+}
+.faq-item:hover{border-color:var(--border-bright)}
+.faq-item.open{border-color:var(--primary)}
+.faq-q{
+  width:100%;
+  padding:20px 24px;
+  text-align:left;
+  font:600 15px/1.4 var(--font-mono);
+  display:flex;justify-content:space-between;align-items:center;
+  gap:16px;
+  color:var(--text);
+}
+.faq-q::after{
+  content:'+';
+  font-size:20px;color:var(--primary);
+  transition:transform 0.2s;
+  flex-shrink:0;
+}
+.faq-item.open .faq-q::after{transform:rotate(45deg)}
+.faq-a{
+  max-height:0;overflow:hidden;
+  transition:max-height 0.3s ease;
+}
+.faq-item.open .faq-a{max-height:300px}
+.faq-a-inner{
+  padding:0 24px 20px;
+  color:var(--text-dim);
+  font-size:14px;line-height:1.6;
+}
+
+/* CTA */
+.cta-banner{
+  margin:80px 32px;
+  padding:64px 32px;
+  max-width:1200px;
+  margin-left:auto;margin-right:auto;
+  background:linear-gradient(135deg,var(--surface-2),var(--surface));
+  border:1px solid var(--border-bright);
+  border-radius:4px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.cta-banner::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,229,255,0.05) 1px,transparent 1px);
+  background-size:24px 24px;
+  pointer-events:none;
+}
+.cta-banner h2{
+  font:800 clamp(24px,3vw,36px)/1.2 var(--font-mono);
+  margin-bottom:16px;
+  position:relative;
+}
+.cta-banner p{
+  color:var(--text-dim);margin-bottom:32px;
+  position:relative;
+}
+.cta-banner .btn-pixel{position:relative}
+
+/* Footer */
+.footer{
+  border-top:1px solid var(--border);
+  padding:48px 32px;
+  background:var(--surface);
+}
+.footer-inner{
+  max-width:1200px;margin:0 auto;
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr 1fr;
+  gap:48px;
+}
+.footer-brand{
+  display:flex;flex-direction:column;gap:12px;
+}
+.footer-brand p{
+  color:var(--muted);font-size:13px;line-height:1.6;
+  max-width:280px;
+}
+.footer-col h4{
+  font:600 12px/1 var(--font-mono);
+  text-transform:uppercase;letter-spacing:0.1em;
+  color:var(--text-dim);
+  margin-bottom:16px;
+}
+.footer-col a{
+  display:block;
+  color:var(--muted);font-size:13px;
+  padding:6px 0;
+  transition:color 0.15s;
+}
+.footer-col a:hover{color:var(--primary)}
+.footer-bottom{
+  max-width:1200px;margin:48px auto 0;
+  padding-top:32px;
+  border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  font:12px/1 var(--font-mono);
+  color:var(--muted);
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+.modal-backdrop{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.7);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+  z-index:1000;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+  animation:fadeIn 0.15s ease-out;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{
+  background:var(--surface);
+  border:1px solid var(--border-bright);
+  border-radius:4px;
+  max-width:480px;width:100%;
+  max-height:90vh;overflow-y:auto;
+  box-shadow:var(--shadow-pixel),0 0 60px rgba(0,0,0,0.5);
+  animation:modalIn 0.2s cubic-bezier(.2,.9,.3,1);
+}
+@keyframes modalIn{
+  from{opacity:0;transform:translateY(20px) scale(0.96)}
+  to{opacity:1;transform:none}
+}
+.modal-header{
+  padding:20px 24px;
+  border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.modal-header h2{
+  font:700 16px/1 var(--font-mono);
+  text-transform:uppercase;letter-spacing:0.06em;
+}
+.modal-close{
+  width:32px;height:32px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);
+  font-size:18px;
+  border-radius:2px;
+  transition:all 0.15s;
+}
+.modal-close:hover{background:var(--surface-3);color:var(--text)}
+.modal-body{padding:24px}
+.modal-footer{
+  padding:16px 24px;
+  border-top:1px solid var(--border);
+  display:flex;justify-content:flex-end;gap:12px;
+}
+.form-group{margin-bottom:20px}
+.form-group label{
+  display:block;
+  font:600 11px/1 var(--font-mono);
+  text-transform:uppercase;letter-spacing:0.08em;
+  color:var(--text-dim);
+  margin-bottom:8px;
+}
+.form-input{
+  width:100%;
+  padding:10px 14px;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:2px;
+  color:var(--text);
+  font:14px/1.4 var(--font-mono);
+  outline:none;
+  transition:border-color 0.15s;
+}
+.form-input:focus{border-color:var(--primary)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tab-switch{
+  display:flex;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:2px;
+  padding:3px;
+  margin-bottom:24px;
+}
+.tab-switch button{
+  flex:1;
+  padding:8px;
+  font:600 12px/1 var(--font-mono);
+  text-transform:uppercase;letter-spacing:0.08em;
+  color:var(--text-dim);
+  border-radius:2px;
+  transition:all 0.15s;
+}
+.tab-switch button.active{
+  background:var(--primary);
+  color:var(--bg);
+}
+.modal-note{
+  font-size:12px;color:var(--muted);
+  text-align:center;margin-top:16px;
+}
+.modal-note a{color:var(--primary);cursor:pointer}
+.modal-note a:hover{text-decoration:underline}
+
+/* Template grid */
+.template-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:20px;
+}
+.template-item{
+  aspect-ratio:1;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:2px;
+  padding:8px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:all 0.15s;
+}
+.template-item:hover{
+  border-color:var(--primary);
+  transform:translateY(-2px);
+}
+.template-item.selected{
+  border-color:var(--primary);
+  background:rgba(0,229,255,0.1);
+}
+.template-item canvas{
+  width:100%;height:100%;
+  image-rendering:pixelated;
+}
+
+/* Size presets */
+.size-presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.size-presets button{
+  padding:6px 12px;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:2px;
+  font:12px/1 var(--font-mono);
+  color:var(--text-dim);
+  transition:all 0.15s;
+}
+.size-presets button:hover{border-color:var(--primary);color:var(--text)}
+.size-presets button.active{
+  background:var(--primary);
+  color:var(--bg);
+  border-color:var(--primary);
+}
+
+/* ============================================================
+   APP (Editor)
+   ============================================================ */
+#app{
+  position:fixed;inset:0;
+  display:flex;flex-direction:column;
+  background:var(--bg);
+}
+
+/* Top bar */
+.app-header{
+  height:52px;
+  display:flex;align-items:center;gap:12px;
+  padding:0 12px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.app-header .nav-logo{cursor:pointer;padding:4px 8px;border-radius:2px}
+.app-header .nav-logo:hover{background:var(--surface-2)}
+.app-divider{
+  width:1px;height:24px;
+  background:var(--border);
+  margin:0 4px;
+}
+.project-name{
+  font:600 13px/1 var(--font-mono);
+  padding:6px 10px;
+  border-radius:2px;
+  color:var(--text);
+  transition:background 0.15s;
+  cursor:text;
+}
+.project-name:hover{background:var(--surface-2)}
+.project-name-input{
+  font:600 13px/1 var(--font-mono);
+  padding:6px 10px;
+  background:var(--bg);
+  border:1px solid var(--primary);
+  border-radius:2px;
+  color:var(--text);
+  outline:none;
+  min-width:200px;
+}
+.app-header-actions{
+  margin-left:auto;
+  display:flex;align-items:center;gap:8px;
+}
+.icon-btn{
+  width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:2px;
+  color:var(--text-dim);
+  transition:all 0.15s;
+  font-size:16px;
+  position:relative;
+}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+.icon-btn.active{background:var(--surface-3);color:var(--primary)}
+.icon-btn:disabled{opacity:0.3;cursor:not-allowed}
+.icon-btn:disabled:hover{background:transparent;color:var(--text-dim)}
+.icon-btn svg{width:18px;height:18px}
+.avatar{
+  width:32px;height:32px;
+  border-radius:2px;
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  display:flex;align-items:center;justify-content:center;
+  font:700 12px/1 var(--font-mono);
+  color:var(--bg);
+  cursor:pointer;
+  margin-left:4px;
+}
+
+/* App body */
+.app-body{
+  flex:1;
+  display:flex;
+  min-height:0;
+  overflow:hidden;
+}
+
+/* Left toolbar */
+.toolbar{
+  width:52px;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  padding:8px 0;
+  gap:2px;
+  flex-shrink:0;
+  overflow-y:auto;
+}
+.tool{
+  width:44px;height:44px;
+  margin:0 4px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:2px;
+  color:var(--text-dim);
+  transition:all 0.12s;
+  position:relative;
+  cursor:pointer;
+}
+.tool:hover{background:var(--surface-2);color:var(--text)}
+.tool.active{
+  background:var(--primary);
+  color:var(--bg);
+}
+.tool svg{width:20px;height:20px}
+.tool[title]:hover::after{
+  content:attr(title);
+  position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);
+  background:var(--surface-3);
+  color:var(--text);
+  font:11px/1 var(--font-mono);
+  padding:6px 10px;
+  border-radius:2px;
+  white-space:nowrap;
+  pointer-events:none;
+  z-index:100;
+  border:1px solid var(--border-bright);
+}
+.toolbar-divider{
+  height:1px;
+  background:var(--border);
+  margin:6px 8px;
+}
+
+/* Canvas area */
+.canvas-area{
+  flex:1;
+  position:relative;
+  overflow:hidden;
+  background:var(--bg);
+  background-image:
+    linear-gradient(rgba(42,42,62,0.4) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(42,42,62,0.4) 1px,transparent 1px);
+  background-size:16px 16px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:crosshair;
+}
+.canvas-area.panning{cursor:grabbing}
+.canvas-area.picker{cursor:copy}
+.canvas-wrapper{
+  position:relative;
+  box-shadow:0 8px 32px rgba(0,0,0,0.6);
+}
+#editorCanvas{
+  display:block;
+  image-rendering:pixelated;
+  image-rendering:crisp-edges;
+  user-select:none;
+  touch-action:none;
+}
+#overlayCanvas{
+  position:absolute;inset:0;
+  pointer-events:none;
+  image-rendering:pixelated;
+}
+
+/* Right sidebar */
+.sidebar{
+  width:280px;
+  background:var(--surface);
+  border-left:1px solid var(--border);
+  display:flex;flex-direction:column;
+  flex-shrink:0;
+  overflow:hidden;
+}
+.sidebar-tabs{
+  display:flex;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.sidebar-tab{
+  flex:1;
+  padding:12px 8px;
+  font:600 11px/1 var(--font-mono);
+  text-transform:uppercase;letter-spacing:0.08em;
+  color:var(--text-dim);
+  border-bottom:2px solid transparent;
+  transition:all 0.15s;
+}
+.sidebar-tab:hover{color:var(--text)}
+.sidebar-tab.active{
+  color:var(--primary);
+  border-bottom-color:var(--primary);
+}
+.sidebar-panel{
+  flex:1;
+  overflow-y:auto;
+  padding:16px;
+  display:none;
+}
+.sidebar-panel.active{display:block}
+
+/* Color panel */
+.color-current{
+  display:flex;gap:8px;margin-bottom:16px;
+}
+.color-swatch{
+  flex:1;
+  aspect-ratio:1;
+  border:2px solid var(--border-bright);
+  border-radius:2px;
+  cursor:pointer;
+  position:relative;
+  transition:all 0.15s;
+}
+.color-swatch:hover{transform:scale(1.05)}
+.color-swatch.active{
+  border-color:var(--primary);
+  box-shadow:0 0 12px rgba(0,229,255,0.5);
+}
+.color-swatch-label{
+  position:absolute;bottom:-20px;left:0;right:0;
+  text-align:center;
+  font:10px/1 var(--font-mono);
+  color:var(--muted);
+}
+.color-picker-label{
+  font:600 11px/1 var(--font-mono);
+  text-transform:uppercase;letter-spacing:0.08em;
+  color:var(--text-dim);
+  margin:24px 0 8px;
+}
+.color-hex{
+  width:100%;
+  padding:8px 10px;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:2px;
+  color:var(--text);
+  font:13px/1 var(--font-mono);
+  text-transform:uppercase;
+  outline:none;
+}
+.color-hex:focus{border-color:var(--primary)}
+.palette-grid{
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:4px;
+  margin-top:8px;
+}
+.palette-cell{
+  aspect-ratio:1;
+  border-radius:1px;
+  cursor:pointer;
+  border:1px solid transparent;
+  transition:all 0.12s;
+}
+.palette-cell:hover{
+  transform:scale(1.15);
+  border-color:var(--text);
+  z-index:1;
+}
+
+/* Layers panel */
+.layers-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:12px;
+}
+.layers-header span{
+  font:600 11px/1 var(--font-mono);
+  text-transform:uppercase;letter-spacing:0.08em;
+  color:var(--text-dim);
+}
+.layers-actions{display:flex;gap:4px}
+.layers-actions button{
+  width:24px;height:24px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:2px;
+  color:var(--text-dim);
+  font-size:14px;
+  transition:all 0.15s;
+}
+.layers-actions button:hover{background:var(--surface-3);color:var(--text)}
+.layer-item{
+  padding:8px 10px;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:2px;
+  margin-bottom:4px;
+  display:flex;align-items:center;gap:8px;
+  cursor:pointer;
+  transition:all 0.15s;
+  font:12px/1 var(--font-mono);
+}
+.layer-item:hover{border-color:var(--border-bright)}
+.layer-item.active{
+  border-color:var(--primary);
+  background:rgba(0,229,255,0.06);
+}
+.layer-vis{
+  width:16px;height:16px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-dim);
+  flex-shrink:0;
+}
+.layer-vis.off{opacity:0.3}
+.layer-name{
+  flex:1;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.layer-thumb{
+  width:24px;height:24px;
+  background:var(--surface-3);
+  border:1px solid var(--border);
+  border-radius:1px;
+  image-rendering:pixelated;
+  flex-shrink:0;
+}
+
+/* Properties panel */
+.prop-row{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:16px;
+  font:12px/1 var(--font-mono);
+}
+.prop-row label{
+  flex:0 0 80px;
+  color:var(--text-dim);
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  font-size:10px;
+}
+.prop-row input[type="range"]{
+  flex:1;
+  accent-color:var(--primary);
+}
+.prop-row .val{
+  flex:0 0 40px;
+  text-align:right;
+  color:var(--text);
+}
+
+/* Status bar */
+.status-bar{
+  height:28px;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 12px;
+  gap:16px;
+  font:11px/1 var(--font-mono);
+  color:var(--muted);
+  flex-shrink:0;
+}
+.status-bar .status-item{display:flex;align-items:center;gap:6px}
+.status-bar .status-item strong{color:var(--text-dim);font-weight:500}
+.status-bar .status-spacer{margin-left:auto}
+.status-saved{color:var(--success)}
+.status-dirty{color:var(--warning)}
+
+/* Zoom control */
+.zoom-control{
+  display:flex;align-items:center;gap:2px;
+  background:var(--surface-2);
+  border-radius:2px;
+  padding:2px;
+}
+.zoom-control button{
+  width:22px;height:22px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:1px;
+  color:var(--text-dim);
+  font-size:14px;
+  transition:all 0.1s;
+}
+.zoom-control button:hover{background:var(--surface-3);color:var(--text)}
+.zoom-level{
+  min-width:44px;
+  text-align:center;
+  font:11px/1 var(--font-mono);
+  color:var(--text);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width:968px){
+  .hero{grid-template-columns:1fr;gap:40px;padding:60px 24px}
+  .hero-demo{max-width:420px;margin:0 auto}
+  .nav-links{display:none}
+  .footer-inner{grid-template-columns:1fr 1fr}
+}
+@media (max-width:640px){
+  .nav{padding:12px 16px}
+  .nav-actions .btn-pixel.ghost{display:none}
+  .section{padding:56px 20px}
+  .footer-inner{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;gap:12px;text-align:center}
+  .sidebar{display:none}
+  .toolbar{width:44px}
+  .tool{width:36px;height:36px;margin:0 4px}
+  .app-header{padding:0 8px;gap:6px}
+  .app-header .nav-logo span{display:none}
+  .project-name{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .app-header-actions{gap:2px}
+  .icon-btn{width:32px;height:32px}
 }
 </style>
 </head>
 <body>
 
-<div id="app">
-  <header>
-    <h1 id="greeting">Happy Birthday</h1>
-    <div class="sub">make a wish</div>
-  </header>
+<!-- ============================================================
+     LANDING PAGE
+     ============================================================ -->
+<div id="landing">
+  <div class="landing-inner">
 
-  <div id="stage">
-    <canvas id="cv"></canvas>
-    <canvas id="fx"></canvas>
-  </div>
+    <nav class="nav">
+      <div class="nav-logo">
+        <div class="nav-logo-icon">
+          <div></div><div></div><div></div>
+          <div></div><div></div><div></div>
+          <div></div><div></div><div></div>
+        </div>
+        <span>PIXELFORGE</span>
+      </div>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#testimonials">Testimonials</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="nav-actions">
+        <button class="btn-pixel ghost" data-auth="login">Sign in</button>
+        <button class="btn-pixel primary" data-auth="signup">Get started</button>
+      </div>
+    </nav>
 
-  <div id="controls">
-    <input type="text" class="name-input" id="nameInput" placeholder="their name..." maxlength="24">
-    <button class="btn" id="uploadBtn">📷 Photo</button>
-    <button class="btn" id="cakeBtn">🎂 Cake</button>
+    <header class="hero">
+      <div class="hero-text">
+        <h1>Pixel art for <span class="accent">the modern</span> <span class="accent2">creator</span></h1>
+        <p class="lead">Draw, layer, and export pixel-perfect sprites in your browser. No install, no waiting, no subscription required to start.</p>
+        <div class="hero-cta">
+          <button class="btn-pixel primary" data-auth="signup">Start drawing →</button>
+          <button class="btn-pixel" data-demo="true">Try the demo</button>
+        </div>
+        <div class="hero-meta">
+          <div><span class="dot"></span>Free forever plan</div>
+          <div>◆ Works offline</div>
+          <div>◆ No account needed for demo</div>
+        </div>
+      </div>
+      <div class="hero-demo">
+        <span class="demo-label">Live preview</span>
+        <canvas id="heroCanvas" width="32" height="32"></canvas>
+      </div>
+    </header>
+
+    <div class="social-proof">
+      <p>Trusted by creators at</p>
+      <div class="logos">
+        <span>INDIE·DEV</span>
+        <span>PIXELHAUS</span>
+        <span>SPRITE·CO</span>
+        <span>ARCADE</span>
+        <span>LO·FI·LAB</span>
+      </div>
+    </div>
+
+    <section id="features" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Features</div>
+        <h2>Everything you need. Nothing you don't.</h2>
+        <p>A focused pixel editor built for people who ship. Fast, keyboard-first, and made for sprites.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">✎</div>
+          <h3>Full toolset</h3>
+          <p>Pencil, eraser, bucket fill, eyedropper, line, rectangle, and ellipse. Every tool you actually use.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">▤</div>
+          <h3>Unlimited layers</h3>
+          <p>Stack, rename, hide, and reorder layers. Each layer is fully independent with its own opacity.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">↶</div>
+          <h3>Real undo history</h3>
+          <p>Full state snapshots on every action. Undo and redo up to 50 steps back. Nothing is ever lost.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⌘</div>
+          <h3>Keyboard-first</h3>
+          <p>Every tool and action has a shortcut. Draw at the speed of thought without touching a menu.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⬇</div>
+          <h3>Clean exports</h3>
+          <p>Export at 1×, 4×, 8×, or 16× scale. PNG output with a transparent background, crisp pixels, no artifacts.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Instant autosave</h3>
+          <p>Every stroke saves to your browser. Close the tab, come back tomorrow, and everything is right where you left it.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Pricing</div>
+        <h2>Start free. Upgrade when you need more.</h2>
+        <p>No credit card required. No hidden limits on the free tier.</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <h3>Free</h3>
+          <div class="pricing-price">
+            <span class="amount">$0</span>
+            <span class="period">forever</span>
+          </div>
+          <ul class="pricing-features">
+            <li>Unlimited pixel art</li>
+            <li>Up to 5 layers per project</li>
+            <li>32×32 to 128×128 canvas</li>
+            <li>PNG export</li>
+            <li>Autosave to browser</li>
+          </ul>
+          <button class="btn-pixel" data-auth="signup">Get started free</button>
+        </div>
+        <div class="pricing-card featured">
+          <div class="pricing-badge">Most popular</div>
+          <h3>Pro</h3>
+          <div class="pricing-price">
+            <span class="amount">$8</span>
+            <span class="period">/month</span>
+          </div>
+          <ul class="pricing-features">
+            <li>Everything in Free</li>
+            <li>Unlimited layers</li>
+            <li>Up to 512×512 canvas</li>
+            <li>All export scales</li>
+            <li>Cloud sync across devices</li>
+            <li>Priority support</li>
+          </ul>
+          <button class="btn-pixel primary" data-auth="signup">Start free trial</button>
+        </div>
+        <div class="pricing-card">
+          <h3>Studio</h3>
+          <div class="pricing-price">
+            <span class="amount">$24</span>
+            <span class="period">/month</span>
+          </div>
+          <ul class="pricing-features">
+            <li>Everything in Pro</li>
+            <li>Team workspaces</li>
+            <li>Shared project libraries</li>
+            <li>Custom export presets</li>
+            <li>SSO and SAML</li>
+            <li>Dedicated support</li>
+          </ul>
+          <button class="btn-pixel" data-auth="signup">Contact sales</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="testimonials" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">Loved by creators</div>
+        <h2>From hobbyists to studios.</h2>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial">
+          <p class="testimonial-quote">"I switched from a much heavier tool and never looked back. PixelForge gets out of the way."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">SC</div>
+            <div class="testimonial-info">
+              <div class="testimonial-name">Sam Chen</div>
+              <div class="testimonial-role">Indie game dev</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial">
+          <p class="testimonial-quote">"The keyboard shortcuts alone are worth it. I can bang out a sprite in minutes."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">MR</div>
+            <div class="testimonial-info">
+              <div class="testimonial-name">Mira Rossi</div>
+              <div class="testimonial-role">Freelance illustrator</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial">
+          <p class="testimonial-quote">"Our whole studio uses it. The layer system is simple enough for juniors, powerful enough for leads."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">JK</div>
+            <div class="testimonial-info">
+              <div class="testimonial-name">Jonas Kim</div>
+              <div class="testimonial-role">Studio lead, Arcade</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="section">
+      <div class="section-header">
+        <div class="section-eyebrow">FAQ</div>
+        <h2>Questions? We have answers.</h2>
+      </div>
+      <div class="faq-list" id="faqList"></div>
+    </section>
+
+    <div class="cta-banner">
+      <h2>Ready to make something pixelated?</h2>
+      <p>Start drawing in your browser in under 5 seconds. No downloads, no signup.</p>
+      <button class="btn-pixel primary" data-auth="signup">Open the editor →</button>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <div class="nav-logo">
+            <div class="nav-logo-icon">
+              <div></div><div></div><div></div>
+              <div></div><div></div><div></div>
+              <div></div><div></div><div></div>
+            </div>
+            <span>PIXELFORGE</span>
+          </div>
+          <p>A focused pixel art studio for creators who ship. Made with care in the browser.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#">Changelog</a>
+          <a href="#">Roadmap</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="#">Documentation</a>
+          <a href="#">Tutorials</a>
+          <a href="#">Templates</a>
+          <a href="#">Community</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="#">About</a>
+          <a href="#">Blog</a>
+          <a href="#">Careers</a>
+          <a href="#">Contact</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 PixelForge. All rights reserved.</span>
+        <span>Made with ◆ and pixels</span>
+      </div>
+    </footer>
+
   </div>
 </div>
 
-<div id="dropzone">Drop a photo here</div>
-<div id="message"></div>
-<input type="file" id="fileInput" accept="image/*">
+<!-- ============================================================
+     APP (EDITOR)
+     ============================================================ -->
+<div id="app" class="hidden">
+  <header class="app-header">
+    <div class="nav-logo" id="appHomeBtn" title="Back to landing">
+      <div class="nav-logo-icon">
+        <div></div><div></div><div></div>
+        <div></div><div></div><div></div>
+        <div></div><div></div><div></div>
+      </div>
+      <span>PIXELFORGE</span>
+    </div>
+    <div class="app-divider"></div>
+    <div id="projectNameEl" class="project-name">Untitled</div>
+    <div class="app-header-actions">
+      <button class="icon-btn" id="undoBtn" title="Undo (Ctrl+Z)" disabled>↶</button>
+      <button class="icon-btn" id="redoBtn" title="Redo (Ctrl+Y)" disabled>↷</button>
+      <div class="app-divider"></div>
+      <button class="icon-btn" id="newProjectBtn" title="New project (Ctrl+N)">＋</button>
+      <button class="icon-btn" id="exportBtn" title="Export PNG (Ctrl+E)">⬇</button>
+      <button class="icon-btn" id="helpBtn" title="Shortcuts (?)">?</button>
+      <div class="app-divider"></div>
+      <div class="avatar" id="avatarBtn" title="Account">A</div>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <aside class="toolbar" id="toolbar">
+      <button class="tool active" data-tool="pencil" title="Pencil (P)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 21l3-3 12-12-3-3L3 15v6z"/>
+          <path d="M15 6l3 3"/>
+        </svg>
+      </button>
+      <button class="tool" data-tool="eraser" title="Eraser (E)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 15l6 6h9l3-3V9l-6-6H9L3 9v6z"/>
+          <path d="M9 9l6 6"/>
+        </svg>
+      </button>
+      <button class="tool" data-tool="fill" title="Bucket (B)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12l9-9 9 9-9 9-9-9z"/>
+          <path d="M9 21h6"/>
+        </svg>
+      </button>
+      <button class="tool" data-tool="picker" title="Eyedropper (I)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 4l6 6-3 3-6-6z"/>
+          <path d="M11 7L4 14v6h6l7-7"/>
+        </svg>
+      </button>
+      <div class="toolbar-divider"></div>
+      <button class="tool" data-tool="line" title="Line (L)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="4" y1="20" x2="20" y2="4"/>
+        </svg>
+      </button>
+      <button class="tool" data-tool="rect" title="Rectangle (R)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="4" y="4" width="16" height="16"/>
+        </svg>
+      </button>
+      <button class="tool" data-tool="ellipse" title="Ellipse (O)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <ellipse cx="12" cy="12" rx="8" ry="8"/>
+        </svg>
+      </button>
+      <div class="toolbar-divider"></div>
+      <button class="tool" data-tool="move" title="Pan (Space+drag)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 9l-3 3 3 3"/>
+          <path d="M9 5l3-3 3 3"/>
+          <path d="M15 19l-3 3-3-3"/>
+          <path d="M19 9l3 3-3 3"/>
+          <path d="M9 12h6"/>
+        </svg>
+      </button>
+    </aside>
+
+    <main class="canvas-area" id="canvasArea">
+      <div class="canvas-wrapper" id="canvasWrapper">
+        <canvas id="editorCanvas"></canvas>
+        <canvas id="overlayCanvas"></canvas>
+      </div>
+    </main>
+
+    <aside class="sidebar">
+      <div class="sidebar-tabs">
+        <button class="sidebar-tab active" data-tab="colors">Colors</button>
+        <button class="sidebar-tab" data-tab="layers">Layers</button>
+        <button class="sidebar-tab" data-tab="props">Props</button>
+      </div>
+
+      <div class="sidebar-panel active" data-panel="colors">
+        <div class="color-current">
+          <div class="color-swatch active" id="primarySwatch" style="background:#00e5ff">
+            <span class="color-swatch-label">FG</span>
+          </div>
+          <div class="color-swatch" id="secondarySwatch" style="background:#ff00aa">
+            <span class="color-swatch-label">BG</span>
+          </div>
+        </div>
+        <div class="color-picker-label">Primary color</div>
+        <input type="text" class="color-hex" id="colorHex" value="#00E5FF" maxlength="7">
+        <div class="color-picker-label">Palette</div>
+        <div class="palette-grid" id="paletteGrid"></div>
+      </div>
+
+      <div class="sidebar-panel" data-panel="layers">
+        <div class="layers-header">
+          <span>Layers</span>
+          <div class="layers-actions">
+            <button id="addLayerBtn" title="Add layer">＋</button>
+            <button id="deleteLayerBtn" title="Delete layer">🗑</button>
+            <button id="moveLayerUpBtn" title="Move up">↑</button>
+            <button id="moveLayerDownBtn" title="Move down">↓</button>
+          </div>
+        </div>
+        <div id="layersList"></div>
+      </div>
+
+      <div class="sidebar-panel" data-panel="props">
+        <div class="prop-row">
+          <label>Grid</label>
+          <input type="checkbox" id="gridToggle" checked>
+        </div>
+        <div class="prop-row">
+          <label>Symmetry</label>
+          <select class="form-input" id="symmetrySelect" style="padding:6px">
+            <option value="none">None</option>
+            <option value="x">Mirror X</option>
+            <option value="y">Mirror Y</option>
+            <option value="both">Both</option>
+          </select>
+        </div>
+        <div class="prop-row">
+          <label>Zoom</label>
+          <input type="range" id="zoomSlider" min="1" max="48" value="16">
+          <span class="val" id="zoomVal">16×</span>
+        </div>
+        <div class="prop-row">
+          <label>Size</label>
+          <span style="flex:1;color:var(--text)" id="sizeVal">32 × 32</span>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="status-bar">
+    <div class="status-item">Pos: <strong id="posDisplay">—, —</strong></div>
+    <div class="status-item">Size: <strong id="sizeDisplay">32×32</strong></div>
+    <div class="status-item">Layer: <strong id="layerDisplay">1/1</strong></div>
+    <div class="zoom-control status-spacer">
+      <button id="zoomOutBtn">−</button>
+      <span class="zoom-level" id="zoomLevel">16×</span>
+      <button id="zoomInBtn">+</button>
+    </div>
+    <div class="status-item" id="saveStatus">
+      <span class="status-saved">● Saved</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================================================
+     MODALS
+     ============================================================ -->
+<div id="authModal" class="modal-backdrop hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="authTitle">Welcome back</h2>
+      <button class="modal-close" data-close="authModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="tab-switch">
+        <button id="loginTab" class="active">Sign in</button>
+        <button id="signupTab">Sign up</button>
+      </div>
+      <div id="authError" style="color:var(--danger);font-size:13px;margin-bottom:12px;display:none"></div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" class="form-input" id="authEmail" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" class="form-input" id="authPassword" placeholder="••••••••">
+      </div>
+      <div class="form-group hidden" id="authConfirmGroup">
+        <label>Confirm password</label>
+        <input type="password" class="form-input" id="authConfirm" placeholder="••••••••">
+      </div>
+      <button class="btn-pixel primary" style="width:100%;justify-content:center" id="authSubmitBtn">
+        Sign in
+      </button>
+      <p class="modal-note">
+        By continuing you agree to our terms. No spam, ever.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div id="newProjectModal" class="modal-backdrop hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>New project</h2>
+      <button class="modal-close" data-close="newProjectModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Project name</label>
+        <input type="text" class="form-input" id="newProjectName" placeholder="Untitled" maxlength="40">
+      </div>
+      <div class="form-group">
+        <label>Canvas size</label>
+        <div class="form-row">
+          <input type="number" class="form-input" id="newProjectW" value="32" min="8" max="512">
+          <input type="number" class="form-input" id="newProjectH" value="32" min="8" max="512">
+        </div>
+        <div class="size-presets">
+          <button data-size="16">16×16</button>
+          <button data-size="32" class="active">32×32</button>
+          <button data-size="64">64×64</button>
+          <button data-size="128">128×128</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Or start from a template</label>
+        <div class="template-grid" id="templateGrid"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-pixel ghost" data-close="newProjectModal">Cancel</button>
+      <button class="btn-pixel primary" id="createProjectBtn">Create</button>
+    </div>
+  </div>
+</div>
+
+<div id="exportModal" class="modal-backdrop hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Export PNG</h2>
+      <button class="modal-close" data-close="exportModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Scale</label>
+        <div class="size-presets" id="exportScaleOptions">
+          <button data-scale="1">1×</button>
+          <button data-scale="2">2×</button>
+          <button data-scale="4" class="active">4×</button>
+          <button data-scale="8">8×</button>
+          <button data-scale="16">16×</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Preview</label>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:2px;padding:16px;display:flex;justify-content:center">
+          <canvas id="exportPreview" style="image-rendering:pixelated;max-width:100%;max-height:240px"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-pixel ghost" data-close="exportModal">Cancel</button>
+      <button class="btn-pixel primary" id="downloadPngBtn">Download PNG</button>
+    </div>
+  </div>
+</div>
+
+<div id="helpModal" class="modal-backdrop hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Keyboard shortcuts</h2>
+      <button class="modal-close" data-close="helpModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="shortcutsList" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-pixel primary" data-close="helpModal">Got it</button>
+    </div>
+  </div>
+</div>
 
 <script>
 'use strict';
-
-/* -------- utils -------- */
+/* ============================================================
+   UTILITIES
+   ============================================================ */
 const $ = id => document.getElementById(id);
+const $$ = sel => document.querySelectorAll(sel);
 const clamp = (x,a,b) => x<a?a:x>b?b:x;
-const lerp = (a,b,t) => a+(b-a)*t;
-const now = () => performance.now();
-const DPR = () => window.devicePixelRatio || 1;
+const now = () => Date.now();
 
-function toast(msg){
-  const el = $('message');
+function hexToRgb(hex){
+  const n = parseInt(hex.replace('#',''), 16);
+  return { r: (n>>16)&255, g: (n>>8)&255, b: n&255 };
+}
+function rgbToHex(r,g,b){
+  return '#' + [r,g,b].map(v => clamp(Math.round(v),0,255).toString(16).padStart(2,'0')).join('');
+}
+
+/* ============================================================
+   DATA
+   ============================================================ */
+const FAQ_DATA = [
+  { q: 'Do I need an account to try it?', a: 'No. Click "Try the demo" on the homepage and you\'ll be in the editor immediately. Accounts are only required for cloud sync and team features.' },
+  { q: 'Where are my projects stored?', a: 'In your browser\'s local storage. Every stroke saves instantly. Your work survives refreshes, closed tabs, and browser restarts. Cloud sync is coming with the Pro plan.' },
+  { q: 'What image formats can I export?', a: 'PNG at multiple scales (1×, 2×, 4×, 8×, 16×). All exports have a transparent background and crisp pixels — no anti-aliasing, no artifacts.' },
+  { q: 'Can I use the exports commercially?', a: 'Yes. Everything you make in PixelForge is yours. No royalties, no attribution required, no restrictions.' },
+  { q: 'Does it work offline?', a: 'Yes. Once the page loads, PixelForge runs entirely in your browser. No network requests, no telemetry, no server dependency. It works on a plane.' },
+  { q: 'What canvas sizes are supported?', a: 'From 8×8 up to 512×512. The free tier supports up to 128×128; Pro unlocks everything up to 512×512 with unlimited layers.' },
+];
+
+const PALETTE = [
+  '#000000','#1a1a28','#2a2a3e','#3a3a52','#6060a0','#a0a0c0','#e0e0f0','#ffffff',
+  '#ff0055','#ff00aa','#a855f7','#00e5ff','#00aaff','#00ff88','#ffaa00','#ffd700',
+  '#8b4513','#cd853f','#deb887','#f5deb3','#228b22','#32cd32','#006400','#008080',
+  '#800020','#dc143c','#ff69b4','#ffb6c1','#4b0082','#9370db','#ff7f50','#ffa07a',
+];
+
+const SHORTCUTS = [
+  ['Pencil', 'P'], ['Eraser', 'E'], ['Bucket fill', 'B'],
+  ['Eyedropper', 'I'], ['Line', 'L'], ['Rectangle', 'R'],
+  ['Ellipse', 'O'], ['Pan', 'Space+drag'],
+  ['Undo', 'Ctrl+Z'], ['Redo', 'Ctrl+Y'],
+  ['New project', 'Ctrl+N'], ['Export PNG', 'Ctrl+E'],
+  ['Toggle grid', 'G'], ['Zoom in', 'Ctrl++'],
+  ['Zoom out', 'Ctrl+-'], ['Show shortcuts', '?'],
+];
+
+// Template data (32×32 pixel art)
+const TEMPLATES = {
+  heart: {
+    name: 'Heart',
+    pixels: (() => {
+      const p = {};
+      const heart = [
+        [8,10],[9,11],[10,12],[11,13],[12,14],[13,13],[14,12],[15,11],[16,10],
+        [7,11],[8,11],[9,12],[10,13],[11,14],[12,15],[13,14],[14,13],[15,12],[16,11],[17,11],
+        [6,12],[7,12],[8,12],[9,13],[10,14],[11,15],[12,16],[13,15],[14,14],[15,13],[16,12],[17,12],[18,12],
+        [6,13],[7,13],[8,13],[9,14],[10,15],[11,16],[12,17],[13,16],[14,15],[15,14],[16,13],[17,13],[18,13],
+        [7,14],[8,14],[9,15],[10,16],[11,17],[12,18],[13,17],[14,16],[15,15],[16,14],[17,14],
+        [8,15],[9,16],[10,17],[11,18],[12,19],[13,18],[14,17],[15,16],[16,15],
+        [9,17],[10,18],[11,19],[12,20],[13,19],[14,18],[15,17],
+        [10,19],[11,20],[12,21],[13,20],[14,19],
+        [11,21],[12,22],[13,21],
+        [12,23],
+      ];
+      for (const [x,y] of heart) p[x + ',' + y] = '#ff0055';
+      return p;
+    })(),
+  },
+  star: {
+    name: 'Star',
+    pixels: (() => {
+      const p = {};
+      const star = [
+        [15,4],[16,4],[15,5],[16,5],[15,6],[16,6],
+        [14,7],[15,7],[16,7],[17,7],
+        [13,8],[14,8],[15,8],[16,8],[17,8],[18,8],
+        [5,10],[6,10],[7,10],[8,10],[9,10],[10,10],[11,10],[12,10],[13,10],[14,10],[15,10],[16,10],[17,10],[18,10],[19,10],[20,10],[21,10],[22,10],[23,10],[24,10],[25,10],[26,10],
+        [7,11],[8,11],[9,11],[10,11],[11,11],[12,11],[13,11],[14,11],[15,11],[16,11],[17,11],[18,11],[19,11],[20,11],[21,11],[22,11],[23,11],[24,11],
+        [9,12],[10,12],[11,12],[12,12],[13,12],[14,12],[15,12],[16,12],[17,12],[18,12],[19,12],[20,12],[21,12],[22,12],
+        [10,13],[11,13],[12,13],[13,13],[14,13],[15,13],[16,13],[17,13],[18,13],[19,13],[20,13],[21,13],
+        [11,14],[12,14],[13,14],[14,14],[15,14],[16,14],[17,14],[18,14],[19,14],[20,14],
+        [12,15],[13,15],[14,15],[15,15],[16,15],[17,15],[18,15],[19,15],
+        [13,16],[14,16],[15,16],[16,16],[17,16],[18,16],
+        [12,17],[13,17],[14,17],[15,17],[16,17],[17,17],[18,17],[19,17],
+        [11,18],[12,18],[13,18],[14,18],[15,18],[16,18],[17,18],[18,18],[19,18],[20,18],
+        [10,19],[11,19],[12,19],[13,19],[14,19],[15,19],[16,19],[17,19],[18,19],[19,19],[20,19],[21,19],
+        [10,20],[11,20],[12,20],[13,20],[14,20],[15,20],[16,20],[17,20],[18,20],[19,20],[20,20],[21,20],
+      ];
+      for (const [x,y] of star) p[x + ',' + y] = '#ffd700';
+      return p;
+    })(),
+  },
+  mushroom: {
+    name: 'Mushroom',
+    pixels: (() => {
+      const p = {};
+      // Cap
+      for (let y = 6; y <= 14; y++){
+        const w = y <= 8 ? 8 : y <= 10 ? 12 : y <= 12 ? 16 : 18;
+        const startX = 16 - Math.floor(w/2);
+        for (let x = startX; x < startX + w; x++) p[x + ',' + y] = '#ff0055';
+      }
+      // White dots on cap
+      [[11,8],[14,9],[18,9],[12,11],[16,11],[20,11],[10,12],[14,12],[18,12]].forEach(([x,y]) => {
+        p[x + ',' + y] = '#ffffff';
+        p[(x+1) + ',' + y] = '#ffffff';
+        p[x + ',' + (y+1)] = '#ffffff';
+        p[(x+1) + ',' + (y+1)] = '#ffffff';
+      });
+      // Stem
+      for (let y = 15; y <= 22; y++) for (let x = 12; x <= 19; x++){
+        if (y === 22 && (x === 12 || x === 19)) continue;
+        p[x + ',' + y] = '#f5deb3';
+      }
+      // Eyes
+      p['13,17'] = '#000000'; p['14,17'] = '#000000';
+      p['17,17'] = '#000000'; p['18,17'] = '#000000';
+      return p;
+    })(),
+  },
+  sword: {
+    name: 'Sword',
+    pixels: (() => {
+      const p = {};
+      // Blade
+      for (let y = 3; y <= 20; y++){
+        p['16,'+y] = '#e0e0f0';
+        p['17,'+y] = '#a0a0c0';
+      }
+      // Tip
+      p['16,2'] = '#ffffff';
+      p['16,1'] = '#ffffff';
+      // Handle
+      for (let y = 21; y <= 26; y++){
+        p['15,'+y] = '#8b4513';
+        p['16,'+y] = '#8b4513';
+        p['17,'+y] = '#8b4513';
+        p['18,'+y] = '#8b4513';
+      }
+      // Guard
+      for (let x = 10; x <= 23; x++){
+        p[x + ',20'] = '#ffd700';
+        p[x + ',21'] = '#ffd700';
+      }
+      // Pommel
+      p['16,27'] = '#ffd700';
+      p['17,27'] = '#ffd700';
+      return p;
+    })(),
+  },
+  coin: {
+    name: 'Coin',
+    pixels: (() => {
+      const p = {};
+      for (let y = 8; y <= 24; y++){
+        for (let x = 8; x <= 24; x++){
+          const dx = x - 16, dy = y - 16;
+          const d = Math.sqrt(dx*dx + dy*dy);
+          if (d < 8) p[x+','+y] = '#ffd700';
+          else if (d < 9) p[x+','+y] = '#b8860b';
+        }
+      }
+      // Inner shine
+      for (let y = 12; y <= 20; y++){
+        for (let x = 12; x <= 20; x++){
+          const dx = x - 16, dy = y - 16;
+          if (Math.sqrt(dx*dx + dy*dy) < 4) p[x+','+y] = '#ffff00';
+        }
+      }
+      // Star mark
+      p['16,15'] = '#ffffff';
+      p['16,16'] = '#ffffff';
+      p['16,17'] = '#ffffff';
+      p['15,16'] = '#ffffff';
+      p['17,16'] = '#ffffff';
+      return p;
+    })(),
+  },
+  tree: {
+    name: 'Tree',
+    pixels: (() => {
+      const p = {};
+      // Trunk
+      for (let y = 20; y <= 28; y++) for (let x = 14; x <= 17; x++) p[x+','+y] = '#8b4513';
+      // Leaves (circle)
+      for (let y = 6; y <= 22; y++){
+        for (let x = 6; x <= 25; x++){
+          const dx = x - 16, dy = y - 14;
+          const d = Math.sqrt(dx*dx + dy*dy);
+          if (d < 9) p[x+','+y] = '#228b22';
+          else if (d < 10 && Math.random() < 0.5) p[x+','+y] = '#32cd32';
+        }
+      }
+      // Highlight
+      for (let y = 9; y <= 13; y++) for (let x = 10; x <= 14; x++){
+        const dx = x - 12, dy = y - 11;
+        if (Math.sqrt(dx*dx + dy*dy) < 3) p[x+','+y] = '#32cd32';
+      }
+      return p;
+    })(),
+  },
+};
+
+/* ============================================================
+   STORAGE
+   ============================================================ */
+const Storage = {
+  KEY_USER: 'pixelforge_user',
+  KEY_PROJECT: 'pixelforge_project_v1',
+
+  getUser(){ try{ return JSON.parse(localStorage.getItem(this.KEY_USER) || 'null'); }catch{ return null; } },
+  setUser(u){ localStorage.setItem(this.KEY_USER, JSON.stringify(u)); },
+  clearUser(){ localStorage.removeItem(this.KEY_USER); },
+
+  getProject(){ try{ return JSON.parse(localStorage.getItem(this.KEY_PROJECT) || 'null'); }catch{ return null; } },
+  setProject(p){
+    try{
+      const serializable = {
+        ...p,
+        layers: p.layers.map(l => ({
+          ...l,
+          data: Array.from(l.data),
+        })),
+      };
+      localStorage.setItem(this.KEY_PROJECT, JSON.stringify(serializable));
+    }catch(e){
+      console.warn('Save failed', e);
+    }
+  },
+  clearProject(){ localStorage.removeItem(this.KEY_PROJECT); },
+};
+
+/* ============================================================
+   AUTH
+   ============================================================ */
+let authMode = 'login';
+
+function openAuth(mode){
+  authMode = mode;
+  $('authModal').classList.remove('hidden');
+  $('authTitle').textContent = mode === 'login' ? 'Welcome back' : 'Create your account';
+  $('authSubmitBtn').textContent = mode === 'login' ? 'Sign in' : 'Create account';
+  $('authConfirmGroup').classList.toggle('hidden', mode === 'login');
+  $('loginTab').classList.toggle('active', mode === 'login');
+  $('signupTab').classList.toggle('active', mode === 'signup');
+  $('authError').style.display = 'none';
+}
+
+function submitAuth(){
+  const email = $('authEmail').value.trim();
+  const pw = $('authPassword').value;
+  const errEl = $('authError');
+  errEl.style.display = 'none';
+
+  if (!email || !email.includes('@')) { showAuthError('Enter a valid email address.'); return; }
+  if (!pw || pw.length < 6) { showAuthError('Password must be at least 6 characters.'); return; }
+
+  if (authMode === 'signup'){
+    const confirm = $('authConfirm').value;
+    if (pw !== confirm) { showAuthError('Passwords do not match.'); return; }
+  }
+
+  const user = { email, createdAt: now(), name: email.split('@')[0] };
+  Storage.setUser(user);
+  $('authModal').classList.add('hidden');
+  enterApp();
+}
+
+function showAuthError(msg){
+  const el = $('authError');
   el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => el.classList.remove('show'), 2000);
+  el.style.display = 'block';
 }
 
-/* -------- constants -------- */
-const CA = 0.5;
-const CHARSET = " .'`,:;~+*?%S#&@";
-const SPRITE_COLS = 64;
-const SPRITE_ROWS = 128;
-const MAX_SPRITES = SPRITE_COLS * SPRITE_ROWS;
+/* ============================================================
+   ROUTER
+   ============================================================ */
+function showLanding(){
+  $('landing').classList.remove('hidden');
+  $('app').classList.add('hidden');
+}
 
-/* -------- canvases -------- */
-const cv = $('cv');
-const ctx = cv.getContext('2d', { alpha: false, desynchronized: true });
-const fx = $('fx');
-const fxCtx = fx.getContext('2d');
+function enterApp(){
+  $('landing').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  const user = Storage.getUser();
+  if (user) $('avatarBtn').textContent = user.name.charAt(0).toUpperCase();
 
-/* -------- state -------- */
-let S = null;
-let src = null;
-let lastFrame = now();
-let needsCompute = false;
-let needsRender = false;
+  // Load or create project
+  const saved = Storage.getProject();
+  if (saved){
+    Editor.load(saved);
+  } else {
+    Editor.newProject('Untitled', 32, 32);
+  }
+  setTimeout(() => { Editor.layout(); Editor.render(); }, 0);
+}
 
-/* -------- confetti -------- */
-const confetti = [];
-const CONFETTI_COLORS = ['#ffd700','#ff9ec4','#b47cff','#fff5f8','#ff6b9d'];
+/* ============================================================
+   EDITOR ENGINE
+   ============================================================ */
+const Editor = {
+  state: {
+    projectName: 'Untitled',
+    width: 32,
+    height: 32,
+    layers: [],
+    activeLayer: 0,
+    tool: 'pencil',
+    primaryColor: '#00e5ff',
+    secondaryColor: '#ff00aa',
+    zoom: 16,
+    panX: 0,
+    panY: 0,
+    showGrid: true,
+    symmetry: 'none',
+    history: [],
+    historyIndex: -1,
+    isDirty: false,
+    savedAt: null,
+  },
 
-function initConfetti(){
-  for (let i = 0; i < 50; i++){
-    confetti.push({
-      x: Math.random(),
-      y: Math.random() * 1.3 - 0.15,
-      vy: 0.03 + Math.random() * 0.08,
-      vx: (Math.random() - 0.5) * 0.02,
-      w: 3 + Math.random() * 6,
-      h: 2 + Math.random() * 3,
-      rot: Math.random() * Math.PI * 2,
-      rotV: (Math.random() - 0.5) * 0.15,
-      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+  // Mouse state
+  isDrawing: false,
+  isPanning: false,
+  panStart: null,
+  lastPixel: null,
+  shapeStart: null,
+  hoverPixel: null,
+  pixelsBefore: null,
+
+  /* ---------- lifecycle ---------- */
+  init(){
+    this.bindEvents();
+    this.renderPalette();
+    this.renderLayers();
+    this.renderShortcuts();
+  },
+
+  newProject(name, w, h, template){
+    this.state.projectName = name || 'Untitled';
+    this.state.width = w;
+    this.state.height = h;
+    this.state.layers = [this.createLayer('Layer 1')];
+    this.state.activeLayer = 0;
+    this.state.history = [];
+    this.state.historyIndex = -1;
+    this.state.isDirty = false;
+    this.state.zoom = this.autoZoom(w, h);
+    this.state.panX = 0;
+    this.state.panY = 0;
+
+    if (template && TEMPLATES[template]){
+      this.applyTemplate(template);
+    }
+
+    this.pushHistory();
+    this.updateUI();
+    this.layout();
+    this.render();
+    this.save();
+  },
+
+  createLayer(name){
+    const { width, height } = this.state;
+    return {
+      id: 'l' + Date.now() + Math.random().toString(36).slice(2,7),
+      name: name || 'Layer',
+      visible: true,
+      opacity: 1,
+      data: new Uint8ClampedArray(width * height * 4),
+    };
+  },
+
+  getActiveLayer(){
+    return this.state.layers[this.state.activeLayer];
+  },
+
+  autoZoom(w, h){
+    const area = $('canvasArea');
+    if (!area) return 16;
+    const availW = area.clientWidth - 80;
+    const availH = area.clientHeight - 80;
+    const z = Math.floor(Math.min(availW / w, availH / h));
+    return clamp(z, 2, 48);
+  },
+
+  /* ---------- load / save ---------- */
+  load(saved){
+    this.state.projectName = saved.projectName || 'Untitled';
+    this.state.width = saved.width || 32;
+    this.state.height = saved.height || 32;
+    this.state.layers = (saved.layers || []).map(l => ({
+      ...l,
+      data: new Uint8ClampedArray(l.data),
+    }));
+    if (!this.state.layers.length) this.state.layers = [this.createLayer('Layer 1')];
+    this.state.activeLayer = Math.min(saved.activeLayer || 0, this.state.layers.length - 1);
+    this.state.primaryColor = saved.primaryColor || '#00e5ff';
+    this.state.secondaryColor = saved.secondaryColor || '#ff00aa';
+    this.state.showGrid = saved.showGrid !== false;
+    this.state.symmetry = saved.symmetry || 'none';
+    this.state.zoom = this.autoZoom(this.state.width, this.state.height);
+    this.state.panX = 0;
+    this.state.panY = 0;
+
+    this.updateUI();
+    this.renderLayers();
+    this.updateSwatch('primary', this.state.primaryColor);
+    this.updateSwatch('secondary', this.state.secondaryColor);
+    $('colorHex').value = this.state.primaryColor.toUpperCase();
+  },
+
+  save(){
+    Storage.setProject({
+      projectName: this.state.projectName,
+      width: this.state.width,
+      height: this.state.height,
+      layers: this.state.layers,
+      activeLayer: this.state.activeLayer,
+      primaryColor: this.state.primaryColor,
+      secondaryColor: this.state.secondaryColor,
+      showGrid: this.state.showGrid,
+      symmetry: this.state.symmetry,
     });
-  }
-}
+    this.state.savedAt = now();
+    this.state.isDirty = false;
+    this.updateSaveStatus();
+  },
 
-function updateConfetti(dt){
-  for (const c of confetti){
-    c.y += c.vy * dt;
-    c.x += c.vx * dt;
-    c.rot += c.rotV * dt;
-    if (c.y > 1.15){ c.y = -0.1; c.x = Math.random(); }
-    if (c.x < -0.05) c.x = 1.05;
-    if (c.x > 1.05) c.x = -0.05;
-  }
-}
+  /* ---------- history ---------- */
+  snapshot(){
+    return this.state.layers.map(l => ({
+      id: l.id,
+      name: l.name,
+      visible: l.visible,
+      opacity: l.opacity,
+      data: new Uint8ClampedArray(l.data),
+    }));
+  },
 
-function renderConfetti(){
-  const w = fx.width, h = fx.height;
-  fxCtx.clearRect(0, 0, w, h);
-  const scale = Math.max(1, w / 800);
-  for (const c of confetti){
-    fxCtx.save();
-    fxCtx.translate(c.x * w, c.y * h);
-    fxCtx.rotate(c.rot);
-    fxCtx.fillStyle = c.color;
-    fxCtx.fillRect(-c.w*scale/2, -c.h*scale/2, c.w*scale, c.h*scale);
-    fxCtx.restore();
-  }
-}
+  pushHistory(){
+    const snap = this.snapshot();
+    this.state.history = this.state.history.slice(0, this.state.historyIndex + 1);
+    this.state.history.push(snap);
+    if (this.state.history.length > 51) this.state.history.shift();
+    this.state.historyIndex = this.state.history.length - 1;
+    this.updateUndoRedo();
+    this.state.isDirty = true;
+    this.updateSaveStatus();
+  },
 
-/* -------- blur -------- */
-function blur(src, W, H, sigma){
-  let a = Float32Array.from(src);
-  let b = new Float32Array(src.length);
-  const r = Math.max(1, Math.round(sigma * 2));
-  const pass = (input, output, horizontal) => {
-    const N = horizontal ? W : H;
-    const M = horizontal ? H : W;
-    const stride = horizontal ? 1 : W;
-    const lineStride = horizontal ? W : 1;
-    const inv = 1 / (2 * r + 1);
-    for (let l = 0; l < M; l++){
-      const base = l * lineStride;
-      let sum = input[base] * (r + 1);
-      for (let i = 1; i <= r; i++) sum += input[base + Math.min(i, N-1) * stride];
-      for (let i = 0; i < N; i++){
-        output[base + i*stride] = sum * inv;
-        sum += input[base + Math.min(N-1, i+r+1) * stride];
-        sum -= input[base + Math.max(0, i-r) * stride];
+  undo(){
+    if (this.state.historyIndex <= 0) return;
+    this.state.historyIndex--;
+    this.restoreSnapshot(this.state.history[this.state.historyIndex]);
+    this.updateUndoRedo();
+    this.state.isDirty = true;
+    this.updateSaveStatus();
+    this.save();
+  },
+
+  redo(){
+    if (this.state.historyIndex >= this.state.history.length - 1) return;
+    this.state.historyIndex++;
+    this.restoreSnapshot(this.state.history[this.state.historyIndex]);
+    this.updateUndoRedo();
+    this.state.isDirty = true;
+    this.updateSaveStatus();
+    this.save();
+  },
+
+  restoreSnapshot(snap){
+    this.state.layers = snap.map(l => ({
+      id: l.id, name: l.name, visible: l.visible, opacity: l.opacity,
+      data: new Uint8ClampedArray(l.data),
+    }));
+    this.state.activeLayer = Math.min(this.state.activeLayer, this.state.layers.length - 1);
+    this.renderLayers();
+    this.render();
+  },
+
+  /* ---------- pixel operations ---------- */
+  getPixel(x, y){
+    const layer = this.getActiveLayer();
+    if (!layer || !layer.visible) return null;
+    if (x < 0 || y < 0 || x >= this.state.width || y >= this.state.height) return null;
+    const i = (y * this.state.width + x) * 4;
+    const d = layer.data;
+    if (d[i+3] === 0) return null;
+    return rgbToHex(d[i], d[i+1], d[i+2]);
+  },
+
+  setPixel(x, y, color, erase){
+    const layer = this.getActiveLayer();
+    if (!layer || !layer.visible) return false;
+    if (x < 0 || y < 0 || x >= this.state.width || y >= this.state.height) return false;
+    const i = (y * this.state.width + x) * 4;
+    if (erase){
+      layer.data[i+3] = 0;
+    } else {
+      const { r, g, b } = hexToRgb(color);
+      layer.data[i] = r;
+      layer.data[i+1] = g;
+      layer.data[i+2] = b;
+      layer.data[i+3] = 255;
+    }
+    return true;
+  },
+
+  setPixelSymmetry(x, y, color, erase){
+    this.setPixel(x, y, color, erase);
+    const w = this.state.width - 1, h = this.state.height - 1;
+    if (this.state.symmetry === 'x' || this.state.symmetry === 'both') this.setPixel(w - x, y, color, erase);
+    if (this.state.symmetry === 'y' || this.state.symmetry === 'both') this.setPixel(x, h - y, color, erase);
+    if (this.state.symmetry === 'both') this.setPixel(w - x, h - y, color, erase);
+  },
+
+  floodFill(startX, startY, color){
+    const layer = this.getActiveLayer();
+    if (!layer || !layer.visible) return;
+    if (startX < 0 || startY < 0 || startX >= this.state.width || startY >= this.state.height) return;
+
+    const W = this.state.width;
+    const getPx = (x, y) => {
+      const i = (y * W + x) * 4;
+      const d = layer.data;
+      if (d[i+3] === 0) return null;
+      return `${d[i]},${d[i+1]},${d[i+2]},${d[i+3]}`;
+    };
+    const startColor = getPx(startX, startY);
+    const { r, g, b } = hexToRgb(color);
+    const targetColor = `255,255,255,255`; // unused, we use setPixel
+    const newColorKey = `${r},${g},${b},255`;
+    if (startColor === newColorKey) return;
+
+    const stack = [[startX, startY]];
+    const visited = new Set();
+    const MAX = this.state.width * this.state.height;
+
+    while (stack.length && visited.size < MAX){
+      const [x, y] = stack.pop();
+      if (x < 0 || y < 0 || x >= this.state.width || y >= this.state.height) continue;
+      const key = `${x},${y}`;
+      if (visited.has(key)) continue;
+      visited.add(key);
+      if (getPx(x, y) !== startColor) continue;
+      this.setPixel(x, y, color);
+      stack.push([x+1, y], [x-1, y], [x, y+1], [x, y-1]);
+    }
+  },
+
+  drawLine(x0, y0, x1, y1, color, erase){
+    let dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
+    let sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+    let err = dx - dy;
+    while (true){
+      this.setPixelSymmetry(x0, y0, color, erase);
+      if (x0 === x1 && y0 === y1) break;
+      const e2 = 2 * err;
+      if (e2 > -dy){ err -= dy; x0 += sx; }
+      if (e2 < dx){ err += dx; y0 += sy; }
+    }
+  },
+
+  drawRect(x0, y0, x1, y1, color, erase, filled){
+    const minX = Math.min(x0, x1), maxX = Math.max(x0, x1);
+    const minY = Math.min(y0, y1), maxY = Math.max(y0, y1);
+    if (filled){
+      for (let y = minY; y <= maxY; y++) for (let x = minX; x <= maxX; x++) this.setPixelSymmetry(x, y, color, erase);
+    } else {
+      for (let x = minX; x <= maxX; x++){ this.setPixelSymmetry(x, minY, color, erase); this.setPixelSymmetry(x, maxY, color, erase); }
+      for (let y = minY; y <= maxY; y++){ this.setPixelSymmetry(minX, y, color, erase); this.setPixelSymmetry(maxX, y, color, erase); }
+    }
+  },
+
+  drawEllipse(x0, y0, x1, y1, color, erase, filled){
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    const rx = Math.abs(x1 - x0) / 2, ry = Math.abs(y1 - y0) / 2;
+    if (rx < 1 || ry < 1) return;
+    if (filled){
+      for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++){
+        for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++){
+          const dx = (x - cx) / rx, dy = (y - cy) / ry;
+          if (dx*dx + dy*dy <= 1) this.setPixelSymmetry(x, y, color, erase);
+        }
+      }
+    } else {
+      const steps = Math.max(24, Math.floor((rx + ry) * 8));
+      let lastX = null, lastY = null;
+      for (let i = 0; i <= steps; i++){
+        const a = (i / steps) * Math.PI * 2;
+        const px = Math.round(cx + Math.cos(a) * rx);
+        const py = Math.round(cy + Math.sin(a) * ry);
+        if (lastX !== null) this.drawLine(lastX, lastY, px, py, color, erase);
+        lastX = px; lastY = py;
       }
     }
-  };
-  pass(a,b,true); [a,b]=[b,a];
-  pass(a,b,true); [a,b]=[b,a];
-  pass(a,b,false);[a,b]=[b,a];
-  pass(a,b,false);[a,b]=[b,a];
-  return a;
+  },
+
+  /* ---------- rendering ---------- */
+  render(){
+    const { width, height, zoom, panX, panY, showGrid } = this.state;
+    const cv = $('editorCanvas');
+    const overlay = $('overlayCanvas');
+    const totalW = width * zoom;
+    const totalH = height * zoom;
+
+    cv.width = totalW;
+    cv.height = totalH;
+    cv.style.width = totalW + 'px';
+    cv.style.height = totalH + 'px';
+    overlay.width = totalW;
+    overlay.height = totalH;
+    overlay.style.width = totalW + 'px';
+    overlay.style.height = totalH + 'px';
+
+    const ctx = cv.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, totalW, totalH);
+
+    // Draw each visible layer
+    for (const layer of this.state.layers){
+      if (!layer.visible) continue;
+      const tmp = document.createElement('canvas');
+      tmp.width = width; tmp.height = height;
+      const tctx = tmp.getContext('2d');
+      const img = tctx.createImageData(width, height);
+      img.data.set(layer.data);
+      tctx.putImageData(img, 0, 0);
+      ctx.globalAlpha = layer.opacity;
+      ctx.drawImage(tmp, 0, 0, totalW, totalH);
+    }
+    ctx.globalAlpha = 1;
+
+    // Grid overlay
+    const octx = overlay.getContext('2d');
+    octx.clearRect(0, 0, totalW, totalH);
+    if (showGrid && zoom >= 6){
+      octx.strokeStyle = 'rgba(255,255,255,0.05)';
+      octx.lineWidth = 1;
+      for (let x = 0; x <= width; x++){
+        octx.beginPath();
+        octx.moveTo(x * zoom + 0.5, 0);
+        octx.lineTo(x * zoom + 0.5, totalH);
+        octx.stroke();
+      }
+      for (let y = 0; y <= height; y++){
+        octx.beginPath();
+        octx.moveTo(0, y * zoom + 0.5);
+        octx.lineTo(totalW, y * zoom + 0.5);
+        octx.stroke();
+      }
+    }
+
+    // Hover cursor
+    if (this.hoverPixel){
+      const { x, y } = this.hoverPixel;
+      if (x >= 0 && y >= 0 && x < width && y < height){
+        octx.strokeStyle = 'rgba(0,229,255,0.8)';
+        octx.lineWidth = 2;
+        octx.strokeRect(x * zoom + 1, y * zoom + 1, zoom - 2, zoom - 2);
+      }
+    }
+  },
+
+  layout(){
+    const wrapper = $('canvasWrapper');
+    if (!wrapper) return;
+    const { width, height, zoom } = this.state;
+    wrapper.style.transform = `translate(${this.state.panX}px, ${this.state.panY}px)`;
+  },
+
+  /* ---------- coordinate helpers ---------- */
+  screenToPixel(e){
+    const cv = $('editorCanvas');
+    const rect = cv.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) / this.state.zoom);
+    const y = Math.floor((e.clientY - rect.top) / this.state.zoom);
+    return { x, y };
+  },
+
+  /* ---------- events ---------- */
+  bindEvents(){
+    const area = $('canvasArea');
+
+    // Pointer down
+    area.addEventListener('pointerdown', (e) => {
+      if (e.button === 1 || this.state.tool === 'move' || e.getModifierState('Space')){
+        this.isPanning = true;
+        this.panStart = { x: e.clientX - this.state.panX, y: e.clientY - this.state.panY };
+        area.classList.add('panning');
+        area.setPointerCapture(e.pointerId);
+        return;
+      }
+      if (e.button !== 0) return;
+
+      const { x, y } = this.screenToPixel(e);
+      if (x < 0 || y < 0 || x >= this.state.width || y >= this.state.height) return;
+
+      this.isDrawing = true;
+      this.pixelsBefore = new Uint8ClampedArray(this.getActiveLayer().data);
+
+      const color = e.button === 2 ? this.state.secondaryColor : this.state.primaryColor;
+
+      if (this.state.tool === 'pencil'){
+        this.setPixelSymmetry(x, y, color, false);
+        this.lastPixel = { x, y };
+        this.render();
+      } else if (this.state.tool === 'eraser'){
+        this.setPixelSymmetry(x, y, color, true);
+        this.lastPixel = { x, y };
+        this.render();
+      } else if (this.state.tool === 'fill'){
+        this.floodFill(x, y, color);
+        this.render();
+        this.pushHistory();
+        this.save();
+        this.isDrawing = false;
+      } else if (this.state.tool === 'picker'){
+        const px = this.getPixel(x, y);
+        if (px){
+          this.state.primaryColor = px;
+          this.updateSwatch('primary', px);
+          $('colorHex').value = px.toUpperCase();
+        }
+        this.isDrawing = false;
+      } else if (this.state.tool === 'line' || this.state.tool === 'rect' || this.state.tool === 'ellipse'){
+        this.shapeStart = { x, y };
+      }
+    });
+
+    // Pointer move
+    area.addEventListener('pointermove', (e) => {
+      if (this.isPanning){
+        this.state.panX = e.clientX - this.panStart.x;
+        this.state.panY = e.clientY - this.panStart.y;
+        this.layout();
+        return;
+      }
+
+      const { x, y } = this.screenToPixel(e);
+      const valid = x >= 0 && y >= 0 && x < this.state.width && y < this.state.height;
+      this.hoverPixel = valid ? { x, y } : null;
+      $('posDisplay').textContent = valid ? `${x}, ${y}` : '—, —';
+
+      if (!this.isDrawing) { this.render(); return; }
+
+      const color = this.state.primaryColor;
+
+      if (this.state.tool === 'pencil' && this.lastPixel){
+        this.drawLine(this.lastPixel.x, this.lastPixel.y, x, y, color, false);
+        this.lastPixel = { x, y };
+        this.render();
+      } else if (this.state.tool === 'eraser' && this.lastPixel){
+        this.drawLine(this.lastPixel.x, this.lastPixel.y, x, y, color, true);
+        this.lastPixel = { x, y };
+        this.render();
+      } else if (this.state.tool === 'line' && this.shapeStart){
+        this.getActiveLayer().data.set(this.pixelsBefore);
+        this.drawLine(this.shapeStart.x, this.shapeStart.y, x, y, color, false);
+        this.render();
+      } else if (this.state.tool === 'rect' && this.shapeStart){
+        this.getActiveLayer().data.set(this.pixelsBefore);
+        this.drawRect(this.shapeStart.x, this.shapeStart.y, x, y, color, false, e.shiftKey);
+        this.render();
+      } else if (this.state.tool === 'ellipse' && this.shapeStart){
+        this.getActiveLayer().data.set(this.pixelsBefore);
+        this.drawEllipse(this.shapeStart.x, this.shapeStart.y, x, y, color, false, e.shiftKey);
+        this.render();
+      }
+    });
+
+    // Pointer up
+    area.addEventListener('pointerup', (e) => {
+      if (this.isPanning){
+        this.isPanning = false;
+        area.classList.remove('panning');
+        return;
+      }
+      if (!this.isDrawing) return;
+
+      if (this.state.tool === 'line' || this.state.tool === 'rect' || this.state.tool === 'ellipse'){
+        this.pushHistory();
+        this.save();
+      } else if (this.state.tool === 'pencil' || this.state.tool === 'eraser'){
+        this.pushHistory();
+        this.save();
+      }
+
+      this.isDrawing = false;
+      this.lastPixel = null;
+      this.shapeStart = null;
+      this.pixelsBefore = null;
+    });
+
+    // Right click
+    area.addEventListener('contextmenu', e => e.preventDefault());
+
+    // Wheel zoom
+    area.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (e.ctrlKey || e.metaKey){
+        const delta = e.deltaY > 0 ? -1 : 1;
+        this.setZoom(this.state.zoom + delta);
+      } else {
+        this.state.panX -= e.deltaX;
+        this.state.panY -= e.deltaY;
+        this.layout();
+      }
+    }, { passive: false });
+
+    // Window resize
+    addEventListener('resize', () => {
+      if (!$('app').classList.contains('hidden')) this.render();
+    });
+
+    // Keyboard
+    addEventListener('keydown', (e) => this.handleKey(e));
+
+    // Toolbar
+    $$('.tool').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.setTool(btn.dataset.tool);
+      });
+    });
+
+    // Sidebar tabs
+    $$('.sidebar-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        $$('.sidebar-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        $$('.sidebar-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === tab.dataset.tab));
+      });
+    });
+
+    // Zoom controls
+    $('zoomInBtn').addEventListener('click', () => this.setZoom(this.state.zoom + 2));
+    $('zoomOutBtn').addEventListener('click', () => this.setZoom(this.state.zoom - 2));
+    $('zoomSlider').addEventListener('input', (e) => this.setZoom(+e.target.value));
+
+    // Grid
+    $('gridToggle').addEventListener('change', (e) => {
+      this.state.showGrid = e.target.checked;
+      this.render();
+    });
+
+    // Symmetry
+    $('symmetrySelect').addEventListener('change', (e) => {
+      this.state.symmetry = e.target.value;
+    });
+
+    // Undo/Redo
+    $('undoBtn').addEventListener('click', () => this.undo());
+    $('redoBtn').addEventListener('click', () => this.redo());
+
+    // Color hex
+    $('colorHex').addEventListener('change', (e) => {
+      let v = e.target.value.trim();
+      if (!v.startsWith('#')) v = '#' + v;
+      if (!/^#[0-9a-fA-F]{6}$/.test(v)){
+        e.target.value = this.state.primaryColor.toUpperCase();
+        return;
+      }
+      this.state.primaryColor = v.toLowerCase();
+      this.updateSwatch('primary', v);
+      e.target.value = v.toUpperCase();
+    });
+
+    // Swatches
+    $('primarySwatch').addEventListener('click', () => {
+      $('primarySwatch').classList.add('active');
+      $('secondarySwatch').classList.remove('active');
+    });
+    $('secondarySwatch').addEventListener('click', () => {
+      $('secondarySwatch').classList.add('active');
+      $('primarySwatch').classList.remove('active');
+      const temp = this.state.primaryColor;
+      this.state.primaryColor = this.state.secondaryColor;
+      this.state.secondaryColor = temp;
+      this.updateSwatch('primary', this.state.primaryColor);
+      this.updateSwatch('secondary', this.state.secondaryColor);
+      $('colorHex').value = this.state.primaryColor.toUpperCase();
+      $('primarySwatch').classList.add('active');
+      $('secondarySwatch').classList.remove('active');
+    });
+
+    // Layers
+    $('addLayerBtn').addEventListener('click', () => this.addLayer());
+    $('deleteLayerBtn').addEventListener('click', () => this.deleteLayer());
+    $('moveLayerUpBtn').addEventListener('click', () => this.moveLayer(-1));
+    $('moveLayerDownBtn').addEventListener('click', () => this.moveLayer(1));
+
+    // Project name
+    $('projectNameEl').addEventListener('click', () => this.editProjectName());
+
+    // Avatar
+    $('avatarBtn').addEventListener('click', () => {
+      const user = Storage.getUser();
+      if (confirm('Sign out?')){
+        Storage.clearUser();
+        showLanding();
+      }
+    });
+
+    // Home
+    $('appHomeBtn').addEventListener('click', () => {
+      this.save();
+      showLanding();
+    });
+
+    // New project
+    $('newProjectBtn').addEventListener('click', () => openNewProjectModal());
+
+    // Export
+    $('exportBtn').addEventListener('click', () => openExportModal());
+
+    // Help
+    $('helpBtn').addEventListener('click', () => $('helpModal').classList.remove('hidden'));
+  },
+
+  handleKey(e){
+    if ($('app').classList.contains('hidden')) return;
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+
+    const k = e.key.toLowerCase();
+    const ctrl = e.ctrlKey || e.metaKey;
+
+    if (ctrl && k === 'z'){ e.preventDefault(); e.shiftKey ? this.redo() : this.undo(); return; }
+    if (ctrl && k === 'y'){ e.preventDefault(); this.redo(); return; }
+    if (ctrl && k === 's'){ e.preventDefault(); this.save(); showSavedToast(); return; }
+    if (ctrl && k === 'e'){ e.preventDefault(); openExportModal(); return; }
+    if (ctrl && k === 'n'){ e.preventDefault(); openNewProjectModal(); return; }
+    if (ctrl && (k === '=' || k === '+')){ e.preventDefault(); this.setZoom(this.state.zoom + 2); return; }
+    if (ctrl && k === '-'){ e.preventDefault(); this.setZoom(this.state.zoom - 2); return; }
+
+    if (k === 'p') this.setTool('pencil');
+    else if (k === 'e') this.setTool('eraser');
+    else if (k === 'b') this.setTool('fill');
+    else if (k === 'i') this.setTool('picker');
+    else if (k === 'l') this.setTool('line');
+    else if (k === 'r') this.setTool('rect');
+    else if (k === 'o') this.setTool('ellipse');
+    else if (k === 'g'){
+      this.state.showGrid = !this.state.showGrid;
+      $('gridToggle').checked = this.state.showGrid;
+      this.render();
+    }
+    else if (k === '?'){
+      $('helpModal').classList.remove('hidden');
+    }
+  },
+
+  /* ---------- tools & state ---------- */
+  setTool(name){
+    this.state.tool = name;
+    $$('.tool').forEach(t => t.classList.toggle('active', t.dataset.tool === name));
+    const area = $('canvasArea');
+    area.classList.toggle('picker', name === 'picker');
+  },
+
+  setZoom(z){
+    this.state.zoom = clamp(z, 1, 48);
+    $('zoomSlider').value = this.state.zoom;
+    $('zoomLevel').textContent = this.state.zoom + '×';
+    $('zoomVal').textContent = this.state.zoom + '×';
+    this.render();
+  },
+
+  /* ---------- colors ---------- */
+  renderPalette(){
+    const grid = $('paletteGrid');
+    grid.innerHTML = '';
+    PALETTE.forEach(c => {
+      const cell = document.createElement('div');
+      cell.className = 'palette-cell';
+      cell.style.background = c;
+      cell.title = c.toUpperCase();
+      cell.addEventListener('click', () => {
+        this.state.primaryColor = c;
+        this.updateSwatch('primary', c);
+        $('colorHex').value = c.toUpperCase();
+      });
+      cell.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        this.state.secondaryColor = c;
+        this.updateSwatch('secondary', c);
+      });
+      grid.appendChild(cell);
+    });
+  },
+
+  updateSwatch(which, color){
+    const el = $(which + 'Swatch');
+    if (el) el.style.background = color;
+  },
+
+  /* ---------- layers ---------- */
+  renderLayers(){
+    const list = $('layersList');
+    list.innerHTML = '';
+    // Render top layer first (reverse order)
+    for (let i = this.state.layers.length - 1; i >= 0; i--){
+      const layer = this.state.layers[i];
+      const el = document.createElement('div');
+      el.className = 'layer-item' + (i === this.state.activeLayer ? ' active' : '');
+      el.innerHTML = `
+        <div class="layer-vis ${layer.visible ? '' : 'off'}">${layer.visible ? '◉' : '○'}</div>
+        <div class="layer-name">${escapeHTML(layer.name)}</div>
+      `;
+      el.querySelector('.layer-vis').addEventListener('click', (e) => {
+        e.stopPropagation();
+        layer.visible = !layer.visible;
+        this.renderLayers();
+        this.render();
+        this.save();
+      });
+      el.addEventListener('click', () => {
+        this.state.activeLayer = i;
+        this.renderLayers();
+        this.updateStatusBar();
+      });
+      list.appendChild(el);
+    }
+    this.updateStatusBar();
+  },
+
+  addLayer(){
+    const layer = this.createLayer('Layer ' + (this.state.layers.length + 1));
+    this.state.layers.push(layer);
+    this.state.activeLayer = this.state.layers.length - 1;
+    this.renderLayers();
+    this.render();
+    this.pushHistory();
+    this.save();
+  },
+
+  deleteLayer(){
+    if (this.state.layers.length <= 1){
+      alert('Cannot delete the only layer.');
+      return;
+    }
+    this.state.layers.splice(this.state.activeLayer, 1);
+    this.state.activeLayer = Math.min(this.state.activeLayer, this.state.layers.length - 1);
+    this.renderLayers();
+    this.render();
+    this.pushHistory();
+    this.save();
+  },
+
+  moveLayer(dir){
+    const i = this.state.activeLayer;
+    const j = i + dir;
+    if (j < 0 || j >= this.state.layers.length) return;
+    [this.state.layers[i], this.state.layers[j]] = [this.state.layers[j], this.state.layers[i]];
+    this.state.activeLayer = j;
+    this.renderLayers();
+    this.render();
+    this.pushHistory();
+    this.save();
+  },
+
+  editProjectName(){
+    const el = $('projectNameEl');
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'project-name-input';
+    input.value = this.state.projectName;
+    input.maxLength = 40;
+    el.replaceWith(input);
+    input.focus();
+    input.select();
+
+    const finish = () => {
+      this.state.projectName = input.value.trim() || 'Untitled';
+      const newEl = document.createElement('div');
+      newEl.id = 'projectNameEl';
+      newEl.className = 'project-name';
+      newEl.textContent = this.state.projectName;
+      input.replaceWith(newEl);
+      newEl.addEventListener('click', () => this.editProjectName());
+      this.save();
+    };
+    input.addEventListener('blur', finish);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') { input.value = this.state.projectName; input.blur(); }
+    });
+  },
+
+  /* ---------- UI updates ---------- */
+  updateUI(){
+    $('projectNameEl').textContent = this.state.projectName;
+    $('sizeDisplay').textContent = this.state.width + '×' + this.state.height;
+    $('sizeVal').textContent = this.state.width + ' × ' + this.state.height;
+    $('zoomLevel').textContent = this.state.zoom + '×';
+    $('zoomVal').textContent = this.state.zoom + '×';
+    $('zoomSlider').value = this.state.zoom;
+    $('gridToggle').checked = this.state.showGrid;
+    $('symmetrySelect').value = this.state.symmetry;
+    this.updateStatusBar();
+    this.updateUndoRedo();
+    this.updateSaveStatus();
+  },
+
+  updateStatusBar(){
+    $('layerDisplay').textContent = (this.state.activeLayer + 1) + '/' + this.state.layers.length;
+  },
+
+  updateUndoRedo(){
+    $('undoBtn').disabled = this.state.historyIndex <= 0;
+    $('redoBtn').disabled = this.state.historyIndex >= this.state.history.length - 1;
+  },
+
+  updateSaveStatus(){
+    const el = $('saveStatus');
+    if (!el) return;
+    if (this.state.isDirty){
+      el.innerHTML = '<span class="status-dirty">● Unsaved</span>';
+    } else {
+      el.innerHTML = '<span class="status-saved">● Saved</span>';
+    }
+  },
+
+  /* ---------- templates ---------- */
+  applyTemplate(name){
+    const tpl = TEMPLATES[name];
+    if (!tpl) return;
+    const layer = this.getActiveLayer();
+    layer.data.fill(0);
+    for (const key in tpl.pixels){
+      const [x, y] = key.split(',').map(Number);
+      if (x < 0 || y < 0 || x >= this.state.width || y >= this.state.height) continue;
+      this.setPixel(x, y, tpl.pixels[key]);
+    }
+  },
+
+  /* ---------- export ---------- */
+  exportPNG(scale){
+    const { width, height } = this.state;
+    const out = document.createElement('canvas');
+    out.width = width * scale;
+    out.height = height * scale;
+    const octx = out.getContext('2d');
+    octx.imageSmoothingEnabled = false;
+
+    // Composite layers
+    const tmp = document.createElement('canvas');
+    tmp.width = width; tmp.height = height;
+    const tctx = tmp.getContext('2d');
+
+    for (const layer of this.state.layers){
+      if (!layer.visible) continue;
+      const img = tctx.createImageData(width, height);
+      img.data.set(layer.data);
+      tctx.putImageData(img, 0, 0);
+      octx.globalAlpha = layer.opacity;
+      octx.drawImage(tmp, 0, 0, out.width, out.height);
+    }
+
+    out.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = (this.state.projectName || 'pixelforge').replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.png';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    }, 'image/png');
+  },
+
+  renderShortcuts(){
+    const list = $('shortcutsList');
+    list.innerHTML = '';
+    SHORTCUTS.forEach(([action, key]) => {
+      const row = document.createElement('div');
+      row.innerHTML = `
+        <span style="color:var(--text-dim)">${escapeHTML(action)}</span>
+        <span style="color:var(--primary);font-family:var(--font-mono);text-align:right">${escapeHTML(key)}</span>
+      `;
+      row.style.display = 'flex';
+      row.style.justifyContent = 'space-between';
+      list.appendChild(row);
+    });
+  },
+};
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function escapeHTML(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-/* -------- build scene -------- */
-function build(){
-  if (!src) return;
-  const iw = src.naturalWidth || src.width;
-  const ih = src.naturalHeight || src.height;
-  const C = 180;
-  const R = Math.max(20, Math.round(C * ih / iw * CA));
-  const N = C * R;
-
-  const off = document.createElement('canvas');
-  off.width = C; off.height = R;
-  const oc = off.getContext('2d', { willReadFrequently: true });
-  oc.fillStyle = '#000';
-  oc.fillRect(0, 0, C, R);
-  oc.imageSmoothingQuality = 'high';
-  oc.drawImage(src, 0, 0, C, R);
-  const data = oc.getImageData(0, 0, C, R).data;
-
-  const rgb = new Float32Array(N * 3);
-  const lum = new Float32Array(N);
-  for (let i = 0; i < N; i++){
-    rgb[i*3] = data[i*4] / 255;
-    rgb[i*3+1] = data[i*4+1] / 255;
-    rgb[i*3+2] = data[i*4+2] / 255;
-    lum[i] = 0.299*rgb[i*3] + 0.587*rgb[i*3+1] + 0.114*rgb[i*3+2];
-  }
-
-  const sorted = Array.from(lum).sort((a,b) => a-b);
-  const lo = sorted[Math.floor(sorted.length * 0.03)];
-  const hi = sorted[Math.floor(sorted.length * 0.995)];
-  const span = Math.max(hi - lo, 1e-3);
-  const L = new Float32Array(N);
-  for (let i = 0; i < N; i++) L[i] = clamp((lum[i] - lo) / span, 0, 1);
-
-  const ch = [new Float32Array(N), new Float32Array(N), new Float32Array(N)];
-  for (let i = 0; i < N; i++){
-    const m = Math.max(rgb[i*3], rgb[i*3+1], rgb[i*3+2]) + 1e-4;
-    ch[0][i] = rgb[i*3] / m;
-    ch[1][i] = rgb[i*3+1] / m;
-    ch[2][i] = rgb[i*3+2] / m;
-  }
-
-  const B = blur(L, C, R, 1.8);
-
-  S = {
-    C, R, N, L, B, ch,
-    glyphs: [...CHARSET],
-    gi: new Uint16Array(N),
-    key: new Uint16Array(N),
-    pg: new Uint16Array(N).fill(65535),
-    pk: new Uint16Array(N).fill(65535),
-    sp: new Int32Array(256 * 4096).fill(-1),
-    ns: 0,
-    cw: 8, chh: 16,
-    atlas: null, actx: null,
-  };
-
-  needsCompute = true;
-  needsRender = true;
-  layout();
+function showSavedToast(){
+  const el = $('saveStatus');
+  if (!el) return;
+  el.innerHTML = '<span class="status-saved">✓ Saved</span>';
+  setTimeout(() => Editor.updateSaveStatus(), 1000);
 }
 
-/* -------- layout -------- */
-function layout(){
-  if (!S) return;
-  const stage = $('stage');
-  const d = DPR();
-  const availW = Math.max(64, stage.clientWidth);
-  const availH = Math.max(64, stage.clientHeight);
+/* ============================================================
+   MODALS LOGIC
+   ============================================================ */
+function openNewProjectModal(){
+  $('newProjectModal').classList.remove('hidden');
+  $('newProjectName').value = '';
+  $('newProjectName').focus();
+  renderTemplateGrid();
+}
 
-  const cellW = Math.min(availW / S.C, availH * CA / S.R);
-  const cw = Math.max(3, Math.floor(cellW * d));
-  const chh = Math.max(4, Math.round(cw / CA));
-  S.cw = cw;
-  S.chh = chh;
+let selectedTemplate = null;
+let selectedSize = 32;
 
-  if (!S.atlas){
-    S.atlas = document.createElement('canvas');
-    S.actx = S.atlas.getContext('2d');
+function renderTemplateGrid(){
+  const grid = $('templateGrid');
+  grid.innerHTML = '';
+  for (const key in TEMPLATES){
+    const item = document.createElement('div');
+    item.className = 'template-item' + (selectedTemplate === key ? ' selected' : '');
+    item.title = TEMPLATES[key].name;
+
+    // Render mini preview
+    const cv = document.createElement('canvas');
+    cv.width = 32; cv.height = 32;
+    const cctx = cv.getContext('2d');
+    cctx.fillStyle = '#1a1a28';
+    cctx.fillRect(0, 0, 32, 32);
+    for (const px in TEMPLATES[key].pixels){
+      const [x, y] = px.split(',').map(Number);
+      cctx.fillStyle = TEMPLATES[key].pixels[px];
+      cctx.fillRect(x, y, 1, 1);
+    }
+    item.appendChild(cv);
+
+    item.addEventListener('click', () => {
+      selectedTemplate = selectedTemplate === key ? null : key;
+      renderTemplateGrid();
+    });
+    grid.appendChild(item);
   }
-  S.atlas.width = SPRITE_COLS * cw;
-  S.atlas.height = SPRITE_ROWS * chh;
-  const a = S.actx;
-  a.font = Math.round(chh * 0.9) + 'px ui-monospace, Menlo, Consolas, monospace';
-  a.textAlign = 'center';
-  a.textBaseline = 'middle';
-  S.sp.fill(-1);
-  S.ns = 0;
-  a.clearRect(0, 0, S.atlas.width, S.atlas.height);
-  S.pg.fill(65535);
-  S.pk.fill(65535);
+}
 
-  cv.width = S.C * cw;
-  cv.height = S.R * chh;
-  const fit = Math.min(1, (availW * d) / cv.width, (availH * d) / cv.height);
-  cv.style.width = (cv.width * fit / d) + 'px';
-  cv.style.height = (cv.height * fit / d) + 'px';
+function createNewProject(){
+  const name = $('newProjectName').value.trim() || 'Untitled';
+  const w = clamp(parseInt($('newProjectW').value) || 32, 8, 512);
+  const h = clamp(parseInt($('newProjectH').value) || 32, 8, 512);
+  Editor.newProject(name, w, h, selectedTemplate);
+  $('newProjectModal').classList.add('hidden');
+  selectedTemplate = null;
+}
+
+function openExportModal(){
+  Editor.save();
+  $('exportModal').classList.remove('hidden');
+  renderExportPreview(4);
+}
+
+function renderExportPreview(scale){
+  const { width, height } = Editor.state;
+  const preview = $('exportPreview');
+  preview.width = width * Math.min(scale, 4);
+  preview.height = height * Math.min(scale, 4);
+  preview.style.width = preview.width + 'px';
+  preview.style.height = preview.height + 'px';
+  const ctx = preview.getContext('2d');
   ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, preview.width, preview.height);
 
-  fx.width = cv.width;
-  fx.height = cv.height;
-  fx.style.width = cv.style.width;
-  fx.style.height = cv.style.height;
-  fxCtx.imageSmoothingEnabled = false;
+  const tmp = document.createElement('canvas');
+  tmp.width = width; tmp.height = height;
+  const tctx = tmp.getContext('2d');
 
-  needsRender = true;
+  for (const layer of Editor.state.layers){
+    if (!layer.visible) continue;
+    const img = tctx.createImageData(width, height);
+    img.data.set(layer.data);
+    tctx.putImageData(img, 0, 0);
+    ctx.globalAlpha = layer.opacity;
+    ctx.drawImage(tmp, 0, 0, preview.width, preview.height);
+  }
 }
 
-/* -------- sprite cache -------- */
-function sprite(g, key){
-  const idx = g * 4096 + key;
-  let i = S.sp[idx];
-  if (i >= 0) return i;
-  if (S.ns >= MAX_SPRITES){
-    S.sp.fill(-1);
-    S.ns = 0;
-    S.actx.clearRect(0, 0, S.atlas.width, S.atlas.height);
-  }
-  i = S.ns++;
-  S.sp[idx] = i;
-  const cw = S.cw, chh = S.chh;
-  const x = (i % SPRITE_COLS) * cw;
-  const y = Math.floor(i / SPRITE_COLS) * chh;
-  const a = S.actx;
-  a.save();
-  a.beginPath();
-  a.rect(x, y, cw, chh);
-  a.clip();
-  a.fillStyle = '#000';
-  a.fillRect(x, y, cw, chh);
-  if (g){
-    const r = ((key >> 8) & 15) * 17;
-    const gg = ((key >> 4) & 15) * 17;
-    const bb = (key & 15) * 17;
-    a.fillStyle = 'rgb(' + r + ',' + gg + ',' + bb + ')';
-    a.fillText(S.glyphs[g] || ' ', x + cw/2, y + chh/2 + chh*0.05);
-  }
-  a.restore();
-  return i;
-}
+let exportScale = 4;
 
-/* -------- compute (runs once per source change) -------- */
-function compute(){
-  const { N, L, B, ch, gi, key } = S;
-  const nG = S.glyphs.length;
-  for (let i = 0; i < N; i++){
-    let Lf = clamp(L[i], 0, 1);
-    Lf += B[i] * 0.35;
-    Lf = clamp(Lf, 0, 1);
+/* ============================================================
+   WIRING UP MODALS & LANDING
+   ============================================================ */
+function bindGlobalEvents(){
+  // Auth
+  $$('[data-auth]').forEach(btn => {
+    btn.addEventListener('click', () => openAuth(btn.dataset.auth));
+  });
 
-    const g = Math.min(nG - 1, (Lf * nG) | 0);
-    const tint = 0.3 + 0.7 * Lf;
-    const r0 = ch[0][i] * 255 * tint;
-    const g0 = ch[1][i] * 255 * tint;
-    const b0 = ch[2][i] * 255 * tint;
+  $$('[data-close]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.close;
+      $(id).classList.add('hidden');
+    });
+  });
 
-    const qr = Math.min(15, Math.max(0, Math.round(r0 / 17)));
-    const qg = Math.min(15, Math.max(0, Math.round(g0 / 17)));
-    const qb = Math.min(15, Math.max(0, Math.round(b0 / 17)));
+  $$('.modal-backdrop').forEach(m => {
+    m.addEventListener('click', (e) => {
+      if (e.target === m) m.classList.add('hidden');
+    });
+  });
 
-    gi[i] = g;
-    key[i] = (qr << 8) | (qg << 4) | qb;
-  }
-  needsCompute = false;
-  needsRender = true;
-}
+  // Auth tabs
+  $('loginTab').addEventListener('click', () => openAuth('login'));
+  $('signupTab').addEventListener('click', () => openAuth('signup'));
+  $('authSubmitBtn').addEventListener('click', submitAuth);
 
-/* -------- render (draws only changed cells) -------- */
-function render(){
-  const { C, R, cw, chh, gi, key, pg, pk, atlas } = S;
-  for (let r = 0; r < R; r++){
-    const y = r * chh;
-    for (let c = 0; c < C; c++){
-      const n = r * C + c;
-      const g = gi[n];
-      const k = g ? key[n] : 0;
-      if (g === pg[n] && k === pk[n]) continue;
-      pg[n] = g;
-      pk[n] = k;
-      const i = sprite(g, k);
-      const sx = (i % SPRITE_COLS) * cw;
-      const sy = Math.floor(i / SPRITE_COLS) * chh;
-      ctx.drawImage(atlas, sx, sy, cw, chh, c * cw, y, cw, chh);
+  // Auth enter key
+  ['authEmail', 'authPassword', 'authConfirm'].forEach(id => {
+    $(id).addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitAuth();
+    });
+  });
+
+  // Demo button
+  $$('[data-demo]').forEach(btn => {
+    btn.addEventListener('click', () => enterApp());
+  });
+
+  // New project
+  $('createProjectBtn').addEventListener('click', createNewProject);
+
+  $$('.size-presets [data-size]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      $$('.size-presets [data-size]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const s = +btn.dataset.size;
+      $('newProjectW').value = s;
+      $('newProjectH').value = s;
+      selectedSize = s;
+    });
+  });
+
+  // Export scale
+  $$('#exportScaleOptions [data-scale]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      $$('#exportScaleOptions [data-scale]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      exportScale = +btn.dataset.scale;
+      renderExportPreview(exportScale);
+    });
+  });
+
+  $('downloadPngBtn').addEventListener('click', () => {
+    Editor.exportPNG(exportScale);
+    $('exportModal').classList.add('hidden');
+  });
+
+  // FAQ
+  renderFAQ();
+
+  // Escape closes modals
+  addEventListener('keydown', (e) => {
+    if (e.key === 'Escape'){
+      $$('.modal-backdrop').forEach(m => m.classList.add('hidden'));
     }
-  }
-  needsRender = false;
-}
-
-/* -------- main loop (only confetti animates) -------- */
-function frame(ts){
-  requestAnimationFrame(frame);
-  if (!S) return;
-
-  const dt = Math.min(0.1, (ts - lastFrame) / 1000);
-  lastFrame = ts;
-
-  if (needsCompute) compute();
-  if (needsRender) render();
-
-  updateConfetti(dt);
-  renderConfetti();
-}
-
-/* -------- birthday cake (procedural) -------- */
-function makeCake(){
-  const c = document.createElement('canvas');
-  c.width = c.height = 800;
-  const g = c.getContext('2d');
-
-  // Background glow
-  const bg = g.createRadialGradient(400, 350, 40, 400, 400, 500);
-  bg.addColorStop(0, '#2a0a20');
-  bg.addColorStop(0.5, '#150812');
-  bg.addColorStop(1, '#050008');
-  g.fillStyle = bg;
-  g.fillRect(0, 0, 800, 800);
-
-  // Plate
-  g.fillStyle = '#ffc8dc';
-  g.beginPath(); g.ellipse(400, 645, 320, 55, 0, 0, Math.PI*2); g.fill();
-  g.fillStyle = '#ffe8f0';
-  g.beginPath(); g.ellipse(400, 640, 320, 55, 0, 0, Math.PI*2); g.fill();
-
-  // Bottom tier
-  g.fillStyle = '#f5b3d1';
-  g.fillRect(180, 440, 440, 200);
-  g.fillStyle = '#fff5f8';
-  g.beginPath();
-  g.moveTo(180, 440);
-  for (let i = 0; i <= 22; i++){
-    const x = 180 + i*20;
-    const y = 440 + (i%2===0 ? -18 : 0);
-    g.lineTo(x, y);
-  }
-  g.lineTo(620, 440); g.lineTo(620, 470); g.lineTo(180, 470);
-  g.closePath(); g.fill();
-
-  // Middle tier
-  g.fillStyle = '#e896bb';
-  g.fillRect(250, 320, 300, 140);
-  g.fillStyle = '#fff5f8';
-  g.beginPath();
-  g.moveTo(250, 320);
-  for (let i = 0; i <= 15; i++){
-    const x = 250 + i*20;
-    const y = 320 + (i%2===0 ? -16 : 0);
-    g.lineTo(x, y);
-  }
-  g.lineTo(550, 320); g.lineTo(550, 348); g.lineTo(250, 348);
-  g.closePath(); g.fill();
-
-  // Top tier
-  g.fillStyle = '#d47da8';
-  g.fillRect(310, 230, 180, 90);
-  g.fillStyle = '#fff5f8';
-  g.beginPath();
-  g.moveTo(310, 230);
-  for (let i = 0; i <= 9; i++){
-    const x = 310 + i*20;
-    const y = 230 + (i%2===0 ? -14 : 0);
-    g.lineTo(x, y);
-  }
-  g.lineTo(490, 230); g.lineTo(490, 252); g.lineTo(310, 252);
-  g.closePath(); g.fill();
-
-  // Candles
-  const candleXs = [345, 400, 455];
-  for (const cx of candleXs){
-    g.fillStyle = '#fff5f8';
-    g.fillRect(cx-7, 160, 14, 70);
-    g.fillStyle = '#ff6b9d';
-    g.fillRect(cx-7, 165, 14, 8);
-    g.fillRect(cx-7, 185, 14, 8);
-    g.fillRect(cx-7, 205, 14, 8);
-    g.fillStyle = '#333';
-    g.fillRect(cx-1, 152, 2, 10);
-    // Flame glow
-    const flame = g.createRadialGradient(cx, 138, 1, cx, 138, 28);
-    flame.addColorStop(0, '#fffbe0');
-    flame.addColorStop(0.4, '#ffd700');
-    flame.addColorStop(0.8, '#ff8800');
-    flame.addColorStop(1, 'rgba(255,80,0,0)');
-    g.fillStyle = flame;
-    g.beginPath(); g.arc(cx, 138, 28, 0, Math.PI*2); g.fill();
-    // Flame core
-    g.fillStyle = '#fffacd';
-    g.beginPath(); g.ellipse(cx, 138, 5, 12, 0, 0, Math.PI*2); g.fill();
-  }
-
-  // Sprinkles
-  const spr = ['#ffd700','#ff6b9d','#b47cff','#fff5f8','#ff9ec4'];
-  for (let i = 0; i < 80; i++){
-    const x = 180 + Math.random() * 440;
-    const y = 250 + Math.random() * 380;
-    g.fillStyle = spr[Math.floor(Math.random() * spr.length)];
-    g.fillRect(x, y, 5, 3);
-  }
-
-  const im = new Image();
-  im.onload = () => setSource(im);
-  im.src = c.toDataURL();
-}
-
-/* -------- source management -------- */
-function setSource(s){
-  src = s;
-  build();
-}
-
-function loadPhoto(file){
-  if (!file || !file.type.startsWith('image/')) return;
-  const fr = new FileReader();
-  fr.onload = () => {
-    const im = new Image();
-    im.onload = () => { setSource(im); toast('Looking good'); };
-    im.onerror = () => toast('Could not read that image');
-    im.src = fr.result;
-  };
-  fr.readAsDataURL(file);
-}
-
-/* -------- UI wiring -------- */
-function initUI(){
-  const nameInput = $('nameInput');
-  const greeting = $('greeting');
-  nameInput.addEventListener('input', () => {
-    const name = nameInput.value.trim();
-    greeting.textContent = name ? 'Happy Birthday, ' + name : 'Happy Birthday';
   });
+}
 
-  $('uploadBtn').addEventListener('click', () => $('fileInput').click());
-  $('fileInput').addEventListener('change', e => loadPhoto(e.target.files[0]));
-
-  $('cakeBtn').addEventListener('click', () => {
-    makeCake();
-    toast('🎂');
+function renderFAQ(){
+  const list = $('faqList');
+  FAQ_DATA.forEach((item, i) => {
+    const el = document.createElement('div');
+    el.className = 'faq-item';
+    el.innerHTML = `
+      <button class="faq-q">${escapeHTML(item.q)}</button>
+      <div class="faq-a"><div class="faq-a-inner">${escapeHTML(item.a)}</div></div>
+    `;
+    el.querySelector('.faq-q').addEventListener('click', () => {
+      const wasOpen = el.classList.contains('open');
+      $$('.faq-item').forEach(x => x.classList.remove('open'));
+      if (!wasOpen) el.classList.add('open');
+    });
+    list.appendChild(el);
   });
+}
 
-  const dz = $('dropzone');
-  ['dragenter', 'dragover'].forEach(ev => addEventListener(ev, e => {
-    e.preventDefault();
-    dz.classList.add('show');
-  }));
-  ['dragleave', 'drop'].forEach(ev => addEventListener(ev, e => {
-    e.preventDefault();
-    if (ev === 'drop' && e.dataTransfer.files[0]) loadPhoto(e.dataTransfer.files[0]);
-    dz.classList.remove('show');
-  }));
+/* ============================================================
+   HERO ANIMATION
+   ============================================================ */
+function startHeroAnimation(){
+  const cv = $('heroCanvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
 
-  addEventListener('paste', e => {
-    for (const item of e.clipboardData.items){
-      if (item.type.startsWith('image/')){
-        loadPhoto(item.getAsFile());
-        break;
+  // Generate a sprite-ish pattern that morphs
+  const frames = [];
+  const W = 32, H = 32;
+
+  function makeFrame(phase){
+    const img = ctx.createImageData(W, H);
+    for (let y = 0; y < H; y++){
+      for (let x = 0; x < W; x++){
+        const i = (y * W + x) * 4;
+        const dx = x - 16, dy = y - 16;
+        const d = Math.sqrt(dx*dx + dy*dy);
+        const a = Math.atan2(dy, dx);
+        const wave = Math.sin(d * 0.6 - phase * 2 + a * 3) * 0.5 + 0.5;
+        const r = 255 * wave;
+        const g = 229 * wave * (0.5 + 0.5 * Math.cos(phase + a));
+        const b = 255 * wave * (0.5 + 0.5 * Math.sin(phase * 1.3 + a));
+        img.data[i] = r;
+        img.data[i+1] = g;
+        img.data[i+2] = b;
+        img.data[i+3] = d < 14 ? 255 : (d < 15 ? 128 : 0);
       }
     }
-  });
+    return img;
+  }
 
-  addEventListener('resize', layout);
-  addEventListener('orientationchange', () => setTimeout(layout, 100));
+  let phase = 0;
+  function tick(){
+    phase += 0.04;
+    const img = makeFrame(phase);
+    ctx.putImageData(img, 0, 0);
+    requestAnimationFrame(tick);
+  }
+  tick();
 }
 
-/* -------- boot -------- */
-function init(){
-  initUI();
-  initConfetti();
-  makeCake();
-  requestAnimationFrame(frame);
+/* ============================================================
+   BOOT
+   ============================================================ */
+function boot(){
+  bindGlobalEvents();
+  Editor.init();
+  startHeroAnimation();
+
+  // If user is already logged in, go straight to app
+  const user = Storage.getUser();
+  if (user){
+    enterApp();
+  }
 }
 
-window.addEventListener('load', init);
+addEventListener('load', boot);
 </script>
 </body>
 </html>
