@@ -3,427 +3,360 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ASCII Buildme — Ultra</title>
+<title>Happy Birthday</title>
 <style>
 :root{
-  --bg:#060609; --fg:#e8e6ee; --mut:#8a8796; --line:#23212c;
-  --acc:#ff9ebb; --panel:#0b0a10; --p2:#14131c;
-  color-scheme:dark;
+  --deep:#0a0108; --panel:#1a0a14; --gold:#ffd700; --rose:#ff9ec4;
+  --cream:#fff5f8; --line:#2a1a24;
 }
-*{box-sizing:border-box}
-html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);
-  font:13px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}
-#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-#cv,#fx{display:block;image-rendering:pixelated;touch-action:none}
-#fx{position:absolute;pointer-events:none}
-#hud{position:fixed;top:14px;right:14px;z-index:4;font:11px ui-monospace,monospace;
-  color:var(--mut);background:rgba(6,6,9,.7);padding:6px 10px;border-radius:6px;
-  border:1px solid var(--line);pointer-events:none;text-align:right;line-height:1.5}
-#hud b{color:var(--fg);font-weight:500}
-#panel{position:fixed;top:0;left:0;bottom:0;width:320px;background:var(--panel);
-  border-right:1px solid var(--line);overflow-y:auto;padding:16px 14px 80px;z-index:10;
-  transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
-  scrollbar-width:thin;scrollbar-color:var(--line) transparent}
-#panel.open{transform:none}
-#panel::-webkit-scrollbar{width:6px}
-#panel::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
-#toggle{position:fixed;top:14px;left:14px;z-index:11;width:38px;height:38px;
-  background:var(--p2);color:var(--fg);border:1px solid var(--line);border-radius:8px;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;
-  transition:left .28s cubic-bezier(.4,0,.2,1),border-color .2s}
-#toggle:hover{border-color:var(--acc)}
-#panel.open~#toggle{left:334px}
-section{margin:0 0 18px}
-section>h3{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);
-  margin:0 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line);font-weight:600}
-.row{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:12px;min-height:26px}
-.row>label{flex:0 0 88px;color:var(--mut);font-size:11px}
-.row>input[type=range]{flex:1;min-width:0;height:4px;-webkit-appearance:none;appearance:none;
-  background:var(--line);border-radius:2px;outline:none}
-.row>input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;
-  border-radius:50%;background:var(--acc);cursor:pointer;border:2px solid var(--panel)}
-.row>input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
-  background:var(--acc);cursor:pointer;border:2px solid var(--panel)}
-.row>output{flex:0 0 44px;text-align:right;font:11px ui-monospace,monospace;color:var(--fg)}
-.row>select{flex:1;background:var(--p2);color:var(--fg);border:1px solid var(--line);
-  border-radius:5px;padding:5px 8px;font:12px inherit;cursor:pointer;outline:none}
-.row>select:hover{border-color:var(--acc)}
-.row>input[type=checkbox]{width:16px;height:16px;accent-color:var(--acc);cursor:pointer}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
-.grid button,.btn{background:var(--p2);color:var(--fg);border:1px solid var(--line);
-  border-radius:6px;padding:8px 10px;font:12px inherit;cursor:pointer;
-  transition:border-color .15s,background .15s;text-align:center;white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis}
-.grid button:hover,.btn:hover{border-color:var(--acc);background:#1a1926}
-.grid button:active,.btn:active{transform:translateY(1px)}
-.grid button.active{border-color:var(--acc);color:var(--acc);background:#1a0f18}
-.btn.wide{grid-column:1/-1}
-.custom-chars{width:100%;background:var(--p2);color:var(--fg);border:1px solid var(--line);
-  border-radius:5px;padding:6px 8px;font:13px ui-monospace,monospace;margin-top:6px;
-  outline:none;resize:none;min-height:36px}
-.custom-chars:focus{border-color:var(--acc)}
-#dropzone{position:fixed;inset:0;background:rgba(6,6,9,.85);border:2px dashed var(--acc);
-  display:none;align-items:center;justify-content:center;z-index:20;
-  font-size:20px;color:var(--acc);pointer-events:none}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  height:100%;
+  background:radial-gradient(ellipse at 50% 0%,#1f0a1a 0%,var(--deep) 70%);
+  color:var(--cream);
+  font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  overflow:hidden;
+  padding-top:env(safe-area-inset-top,0);
+  padding-bottom:env(safe-area-inset-bottom,0);
+}
+#app{
+  height:100%;
+  display:flex;flex-direction:column;align-items:center;
+  padding:20px 16px;gap:14px;
+  position:relative;z-index:2;
+}
+header{text-align:center;flex-shrink:0;animation:fadeIn 1.2s ease-out}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+header h1{
+  font:italic 400 clamp(30px,5.5vw,52px)/1.1 Georgia,"Times New Roman",serif;
+  background:linear-gradient(180deg,var(--gold) 0%,var(--rose) 100%);
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;letter-spacing:0.02em;margin-bottom:4px;
+}
+header .sub{
+  font-size:11px;letter-spacing:0.35em;text-transform:uppercase;
+  color:var(--rose);opacity:0.7;
+}
+#stage{
+  flex:1;min-height:0;width:100%;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+#cv{
+  display:block;image-rendering:pixelated;border-radius:8px;
+  max-width:100%;max-height:100%;
+  box-shadow:0 0 80px rgba(255,158,196,0.12);
+  position:relative;z-index:1;
+}
+#fx{
+  position:absolute;pointer-events:none;z-index:2;
+  left:50%;top:50%;transform:translate(-50%,-50%);
+  image-rendering:auto;
+}
+#controls{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;
+  flex-shrink:0;padding:8px 16px;
+  background:rgba(26,10,20,0.7);border:1px solid var(--line);
+  border-radius:100px;backdrop-filter:blur(12px);
+}
+.name-input{
+  background:transparent;border:none;border-bottom:1px solid var(--line);
+  color:var(--cream);font:inherit;font-style:italic;font-size:15px;
+  padding:4px 6px;outline:none;min-width:130px;max-width:170px;
+  text-align:center;transition:border-color 0.2s;
+}
+.name-input:focus{border-bottom-color:var(--rose)}
+.name-input::placeholder{color:var(--rose);opacity:0.4}
+.btn{
+  background:transparent;border:1px solid var(--line);color:var(--cream);
+  font:inherit;font-size:13px;padding:7px 14px;border-radius:100px;
+  cursor:pointer;transition:all 0.2s;white-space:nowrap;
+}
+.btn:hover{border-color:var(--rose);color:var(--rose);background:rgba(255,158,196,0.08)}
+.btn:active{transform:translateY(1px)}
+#dropzone{
+  position:fixed;inset:0;background:rgba(10,1,8,0.92);
+  border:2px dashed var(--rose);display:none;
+  align-items:center;justify-content:center;z-index:100;
+  font-size:22px;color:var(--rose);font-style:italic;
+}
 #dropzone.show{display:flex}
-#help{position:fixed;inset:0;background:rgba(6,6,9,.9);z-index:30;display:none;
-  align-items:center;justify-content:center;padding:20px;overflow-y:auto}
-#help.show{display:flex}
-#help .card{max-width:640px;width:100%;background:var(--panel);border:1px solid var(--line);
-  border-radius:12px;padding:24px;max-height:90vh;overflow-y:auto}
-#help h2{margin:0 0 16px;color:var(--acc);font-size:18px}
-#help kbd{display:inline-block;background:var(--p2);border:1px solid var(--line);
-  border-radius:4px;padding:1px 6px;font:11px ui-monospace,monospace;min-width:20px;text-align:center}
-#help p{margin:8px 0;color:var(--mut);font-size:13px;line-height:1.6}
-#help .row-k{margin:6px 0;color:var(--fg);font-size:12px}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);
-  background:var(--p2);color:var(--fg);border:1px solid var(--acc);border-radius:8px;
-  padding:10px 20px;font-size:13px;z-index:40;opacity:0;transition:opacity .2s,transform .2s;
-  pointer-events:none}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#message{
+  position:fixed;bottom:90px;left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:var(--panel);border:1px solid var(--rose);
+  padding:8px 20px;border-radius:100px;color:var(--rose);font-size:12px;
+  opacity:0;transition:all 0.3s;pointer-events:none;z-index:50;
+}
+#message.show{opacity:1;transform:translateX(-50%) translateY(0)}
+input[type=file]{display:none}
 @media (max-width:600px){
-  #panel{width:100%;max-width:none}
-  #panel.open~#toggle{left:auto;right:14px}
-  #toggle{width:34px;height:34px}
-  .row>label{flex-basis:76px;font-size:10px}
+  #app{padding:12px 10px;gap:10px}
+  #controls{padding:6px 12px;gap:8px}
+  .btn{padding:6px 12px;font-size:12px}
+  .name-input{font-size:13px;min-width:100px}
 }
 </style>
 </head>
 <body>
 
-<div id="stage">
-  <canvas id="cv"></canvas>
-  <canvas id="fx"></canvas>
-</div>
+<div id="app">
+  <header>
+    <h1 id="greeting">Happy Birthday</h1>
+    <div class="sub">make a wish</div>
+  </header>
 
-<div id="hud"><span id="fps">--</span> fps · <b id="hres">--</b> · <span id="hmode">ascii</span></div>
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <canvas id="fx"></canvas>
+  </div>
 
-<aside id="panel">
-  <section>
-    <h3>Source</h3>
-    <div class="grid">
-      <button id="btn-open">Open image</button>
-      <button id="btn-video">Open video</button>
-      <button id="btn-cam">Webcam</button>
-      <button id="btn-replay">Replay</button>
-    </div>
-    <p style="font-size:11px;color:var(--mut);margin:8px 0 0">Or paste / drop an image anywhere.</p>
-  </section>
-
-  <section>
-    <h3>Output</h3>
-    <div class="row"><label>Mode</label>
-      <select id="mode">
-        <option value="ascii">ASCII</option>
-        <option value="braille">Braille dots</option>
-        <option value="quadrant">Quadrant blocks</option>
-        <option value="dither">Bayer dither</option>
-      </select>
-    </div>
-    <div class="row" id="row-charset"><label>Charset</label>
-      <select id="charset"></select>
-    </div>
-    <textarea id="custom-chars" class="custom-chars" placeholder="Custom chars, dark → light"></textarea>
-    <div class="row"><label>Font</label>
-      <select id="font">
-        <option value="ui-monospace,Menlo,Consolas,monospace">Mono</option>
-        <option value="'Courier New',Courier,monospace">Courier</option>
-        <option value="'Lucida Console',Monaco,monospace">Console</option>
-        <option value="Georgia,'Times New Roman',serif">Serif</option>
-        <option value="Arial,Helvetica,sans-serif">Sans</option>
-        <option value="Impact,'Arial Black',sans-serif">Bold</option>
-      </select>
-    </div>
-    <div class="row"><label>Color</label>
-      <select id="color">
-        <option value="chroma">Chroma</option>
-        <option value="mono">Monochrome</option>
-        <option value="original">Original RGB</option>
-        <option value="palette">Palette</option>
-      </select>
-    </div>
-    <div class="row" id="row-pal"><label>Palette</label>
-      <select id="pal"></select>
-    </div>
-    <div class="row"><label>Resolution</label>
-      <input type="range" id="res" min="60" max="600" step="10" value="220"><output id="res-out">220</output>
-    </div>
-    <div class="row"><label>Auto quality</label>
-      <input type="checkbox" id="autoq" checked>
-    </div>
-  </section>
-
-  <section>
-    <h3>Filters</h3>
-    <div class="row"><label>Brightness</label><input type="range" id="bright" min="30" max="200" value="100"><output id="bright-out">1.00</output></div>
-    <div class="row"><label>Contrast</label><input type="range" id="contrast" min="30" max="250" value="100"><output id="contrast-out">1.00</output></div>
-    <div class="row"><label>Gamma</label><input type="range" id="gamma" min="40" max="200" value="100"><output id="gamma-out">1.00</output></div>
-    <div class="row"><label>Glow</label><input type="range" id="glow" min="0" max="200" value="80"><output id="glow-out">80</output></div>
-    <div class="row"><label>Edges</label><input type="checkbox" id="edges" checked></div>
-  </section>
-
-  <section>
-    <h3>Post FX</h3>
-    <div class="row"><label>Bloom</label><input type="range" id="bloom" min="0" max="40" value="0"><output id="bloom-out">0</output></div>
-    <div class="row"><label>Scanlines</label><input type="range" id="scan" min="0" max="100" value="0"><output id="scan-out">0</output></div>
-    <div class="row"><label>Vignette</label><input type="range" id="vig" min="0" max="100" value="0"><output id="vig-out">0</output></div>
-  </section>
-
-  <section>
-    <h3>Animation</h3>
-    <div class="row"><label>Zoom</label><input type="range" id="zoom" min="0" max="100" value="40"><output id="zoom-out">40</output></div>
-    <div class="row"><label>Breath</label><input type="range" id="breath" min="0" max="100" value="40"><output id="breath-out">40</output></div>
-    <div class="row"><label>Wave</label><input type="range" id="wave" min="0" max="100" value="30"><output id="wave-out">30</output></div>
-    <div class="row"><label>Speed</label><input type="range" id="speed" min="10" max="300" value="100"><output id="speed-out">1.00</output></div>
-  </section>
-
-  <section>
-    <h3>Particles</h3>
-    <div class="row"><label>Type</label>
-      <select id="ptype">
-        <option value="none">Off</option>
-        <option value="dust">Dust</option>
-        <option value="embers">Embers</option>
-        <option value="stars">Stars</option>
-        <option value="snow">Snow</option>
-        <option value="rain">Rain</option>
-        <option value="sparkle">Sparkle</option>
-      </select>
-    </div>
-    <div class="row"><label>Density</label><input type="range" id="pdensity" min="0" max="200" value="100"><output id="pdensity-out">100</output></div>
-  </section>
-
-  <section>
-    <h3>Presets</h3>
-    <div class="grid" id="presets"></div>
-  </section>
-
-  <section>
-    <h3>Export</h3>
-    <div class="grid">
-      <button id="btn-png">Save PNG</button>
-      <button id="btn-txt">Save TXT</button>
-      <button id="btn-webm">Record WebM</button>
-      <button id="btn-json">Save config</button>
-    </div>
-  </section>
-
-  <section>
-    <h3>Session</h3>
-    <div class="grid">
-      <button id="btn-pause">Pause</button>
-      <button id="btn-fs">Fullscreen</button>
-      <button id="btn-help" class="wide">Help &amp; shortcuts</button>
-    </div>
-  </section>
-</aside>
-
-<button id="toggle" aria-label="Toggle panel">☰</button>
-<div id="dropzone">Drop an image</div>
-
-<div id="help">
-  <div class="card">
-    <h2>ASCII Buildme — Ultra</h2>
-    <p>Load an image, video, or your webcam. Everything renders in real time. Use the panel on the left for all controls.</p>
-    <h3 style="color:var(--acc);margin-top:20px">Keyboard shortcuts</h3>
-    <div class="row-k"><kbd>Space</kbd> pause / play</div>
-    <div class="row-k"><kbd>R</kbd> replay</div>
-    <div class="row-k"><kbd>F</kbd> fullscreen</div>
-    <div class="row-k"><kbd>H</kbd> toggle panel</div>
-    <div class="row-k"><kbd>1</kbd>–<kbd>9</kbd> quick preset switch</div>
-    <div class="row-k"><kbd>M</kbd> cycle color mode</div>
-    <div class="row-k"><kbd>V</kbd> cycle render mode</div>
-    <div class="row-k"><kbd>S</kbd> save PNG</div>
-    <div class="row-k"><kbd>?</kbd> this help</div>
-    <div class="row-k"><kbd>Esc</kbd> close help</div>
-    <h3 style="color:var(--acc);margin-top:20px">Tips</h3>
-    <p>· Drag any image onto the window, or paste from clipboard.</p>
-    <p>· Drag the pointer over the canvas — it pushes particles and adds a light.</p>
-    <p>· Lower the resolution for a chunkier look; raise it for more detail.</p>
-    <p>· Auto-quality adapts resolution to keep the frame rate smooth.</p>
-    <p>· Braille mode packs 2×4 dots per cell — best with small resolutions.</p>
-    <p>· Quadrant blocks are great with a palette color mode.</p>
-    <p style="margin-top:20px;text-align:center">
-      <button class="btn" id="help-close" style="min-width:120px">Close</button>
-    </p>
+  <div id="controls">
+    <input type="text" class="name-input" id="nameInput" placeholder="their name..." maxlength="24">
+    <button class="btn" id="uploadBtn">📷 Photo</button>
+    <button class="btn" id="cakeBtn">🎂 Cake</button>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
-
-<input type="file" id="file-img" accept="image/*" multiple hidden>
-<input type="file" id="file-vid" accept="video/*" hidden>
+<div id="dropzone">Drop a photo here</div>
+<div id="message"></div>
+<input type="file" id="fileInput" accept="image/*">
 
 <script>
 'use strict';
-/* ============================================================
-   Utilities
-   ============================================================ */
+
+/* -------- utils -------- */
 const $ = id => document.getElementById(id);
-const clamp = (x, a, b) => x < a ? a : x > b ? b : x;
-const lerp = (a, b, t) => a + (b - a) * t;
-const smooth = x => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
-const rand = (a, b) => a + Math.random() * (b - a);
+const clamp = (x,a,b) => x<a?a:x>b?b:x;
+const lerp = (a,b,t) => a+(b-a)*t;
 const now = () => performance.now();
 const DPR = () => window.devicePixelRatio || 1;
-const hex2rgb = h => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
-function toast(msg, ms = 1600) {
-  const t = $('toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), ms);
+
+function toast(msg){
+  const el = $('message');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove('show'), 2000);
 }
 
-/* ============================================================
-   Constants
-   ============================================================ */
+/* -------- constants -------- */
 const CA = 0.5;
-const BAYER8 = (() => {
-  const m = new Uint8Array(64);
-  const b = [
-    [0,32,8,40,2,34,10,42],[48,16,56,24,50,18,58,26],
-    [12,44,4,36,14,46,6,38],[60,28,52,20,62,30,54,22],
-    [3,35,11,43,1,33,9,41],[51,19,59,27,49,17,57,25],
-    [15,47,7,39,13,45,5,37],[63,31,55,23,61,29,53,21]
-  ];
-  for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) m[y*8+x] = b[y][x];
-  return m;
-})();
+const CHARSET = " .'`,:;~+*?%S#&@";
+const SPRITE_COLS = 64;
+const SPRITE_ROWS = 128;
+const MAX_SPRITES = SPRITE_COLS * SPRITE_ROWS;
 
-const CHARSETS = {
-  classic: " .'`,:;~+*?%S#&@",
-  minimal: " .:-=+*#%@",
-  dense:   "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ",
-  blocks:  " ░▒▓█",
-  shade:   " .·:•◦○●",
-  stars:   " ·+*✦✧✶✷✸✹",
-  hearts:  " .♡♥❤",
-  arrows:  " →↗↑↖←↙↓↘",
-  binary:  " 01",
-  dna:     " .-~=+*#",
-  runes:   " ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ",
-  lines:   " ─━═│┃║┌┐└┘├┤┬┴┼",
-};
-const DEFAULT_CHARSET = 'classic';
+/* -------- canvases -------- */
+const cv = $('cv');
+const ctx = cv.getContext('2d', { alpha: false, desynchronized: true });
+const fx = $('fx');
+const fxCtx = fx.getContext('2d');
 
-const PALETTES = {
-  neon:  ['#0a0014','#ff2d95'],
-  amber: ['#100000','#ffb000'],
-  matrix:['#000000','#00ff41'],
-  ice:   ['#000508','#8fe6ff'],
-  fire:  ['#180000','#ff4d00'],
-  mono:  ['#000000','#ffffff'],
-  dusk:  ['#08011a','#7b5cff'],
-  mint:  ['#001a12','#3dffb0'],
-};
-
-const PRESETS = [
-  { name:'Classic',   s:{ mode:'ascii',    charset:'classic', color:'chroma',  res:220, bright:1,    contrast:1,   gamma:1,    glow:0.8, bloom:0,  scan:0,  vig:0,  zoom:0.4, breath:0.4, wave:0.3, speed:1,   ptype:'dust',    edges:true  } },
-  { name:'Terminal',  s:{ mode:'ascii',    charset:'dense',   color:'palette', res:280, bright:1.1,  contrast:1.2, gamma:0.9,  glow:1.2, bloom:6,  scan:35, vig:40, zoom:0,   breath:0.2, wave:0.5, speed:1,   ptype:'sparkle', edges:true,  pal:'matrix' } },
-  { name:'Neon',      s:{ mode:'ascii',    charset:'minimal', color:'palette', res:200, bright:1.05, contrast:1.15,gamma:1,    glow:1.4, bloom:14, scan:0,  vig:30, zoom:0.3, breath:0.5, wave:0.4, speed:1.2, ptype:'embers',  edges:true,  pal:'neon'   } },
-  { name:'Braille',   s:{ mode:'braille',  charset:'classic', color:'mono',    res:140, bright:1.3,  contrast:1.4, gamma:0.85, glow:0.6, bloom:2,  scan:0,  vig:0,  zoom:0.2, breath:0.3, wave:0.2, speed:1,   ptype:'none',    edges:false } },
-  { name:'Quad',      s:{ mode:'quadrant', charset:'classic', color:'chroma',  res:180, bright:1,    contrast:1.1, gamma:1,    glow:0.9, bloom:4,  scan:0,  vig:0,  zoom:0.2, breath:0.2, wave:0.3, speed:1,   ptype:'dust',    edges:false } },
-  { name:'Dither',    s:{ mode:'dither',   charset:'classic', color:'mono',    res:240, bright:1.1,  contrast:1.3, gamma:0.9,  glow:0.4, bloom:0,  scan:0,  vig:0,  zoom:0,   breath:0,   wave:0,   speed:1,   ptype:'none',    edges:false } },
-  { name:'Amber CRT', s:{ mode:'ascii',    charset:'classic', color:'palette', res:240, bright:1.05, contrast:1.2, gamma:0.95, glow:1.3, bloom:8,  scan:55, vig:55, zoom:0.3, breath:0.3, wave:0.3, speed:1,   ptype:'embers',  edges:true,  pal:'amber'  } },
-  { name:'Fire',      s:{ mode:'ascii',    charset:'blocks',  color:'palette', res:220, bright:1.1,  contrast:1.2, gamma:0.9,  glow:1.4, bloom:12, scan:0,  vig:20, zoom:0.4, breath:0.6, wave:0.6, speed:1.4, ptype:'embers',  edges:false, pal:'fire'   } },
-  { name:'Ice',       s:{ mode:'ascii',    charset:'minimal', color:'palette', res:260, bright:1.05, contrast:1.1, gamma:1,    glow:1.1, bloom:6,  scan:0,  vig:25, zoom:0.3, breath:0.3, wave:0.3, speed:0.8, ptype:'snow',    edges:true,  pal:'ice'    } },
-  { name:'Stars',     s:{ mode:'ascii',    charset:'stars',   color:'mono',    res:200, bright:1.2,  contrast:1.3, gamma:0.9,  glow:1.3, bloom:10, scan:0,  vig:30, zoom:0.4, breath:0.4, wave:0.4, speed:1,   ptype:'stars',   edges:true  } },
-  { name:'Runes',     s:{ mode:'ascii',    charset:'runes',   color:'palette', res:180, bright:1.1,  contrast:1.15,gamma:0.95, glow:1,   bloom:4,  scan:0,  vig:0,  zoom:0.4, breath:0.4, wave:0.4, speed:1,   ptype:'dust',    edges:true,  pal:'dusk'   } },
-  { name:'Mono',      s:{ mode:'ascii',    charset:'minimal', color:'mono',    res:200, bright:1,    contrast:1.2, gamma:0.95, glow:1,   bloom:3,  scan:0,  vig:0,  zoom:0.2, breath:0.2, wave:0.2, speed:1,   ptype:'none',    edges:true  } },
-  { name:'Dense',     s:{ mode:'ascii',    charset:'dense',   color:'chroma',  res:320, bright:1,    contrast:1,   gamma:1,    glow:0.6, bloom:0,  scan:0,  vig:0,  zoom:0.3, breath:0.3, wave:0.3, speed:1,   ptype:'none',    edges:false } },
-  { name:'Rain',      s:{ mode:'ascii',    charset:'binary',  color:'palette', res:220, bright:1.1,  contrast:1.2, gamma:0.9,  glow:1.2, bloom:5,  scan:20, vig:20, zoom:0.2, breath:0.3, wave:0.4, speed:1,   ptype:'rain',    edges:false, pal:'matrix' } },
-];
-
-/* ============================================================
-   State
-   ============================================================ */
-const state = {
-  mode: 'ascii',
-  charset: DEFAULT_CHARSET,
-  customChars: '',
-  font: 'ui-monospace,Menlo,Consolas,monospace',
-  color: 'chroma',
-  pal: 'neon',
-  res: 220,
-  autoq: true,
-  bright: 1,
-  contrast: 1,
-  gamma: 1,
-  glow: 0.8,
-  edges: true,
-  bloom: 0,
-  scan: 0,
-  vig: 0,
-  zoom: 0.4,
-  breath: 0.4,
-  wave: 0.3,
-  speed: 1,
-  ptype: 'dust',
-  pdensity: 1,
-};
-
-/* Runtime */
-const canvas = $('cv');
-const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
-const fxCanvas = $('fx');
-const fxCtx = fxCanvas.getContext('2d');
+/* -------- state -------- */
 let S = null;
 let src = null;
-let live = false;
-let vid = null;
-let mirror = false;
-let paused = false, pauseAt = 0, t0 = now(), lastFrame = now(), lastDraw = 0;
-let emaFps = 60, frameCount = 0, lastAdapt = 0;
-let playlist = [], pi = 0, slideTimer = 0;
-let recorder = null, recordTimer = 0;
-let recComp = null, recCompCtx = null, recRafHandle = null;
-let liveCanvas = null, liveCtx = null;
+let lastFrame = now();
+let needsCompute = false;
+let needsRender = false;
 
-const ptr = { x: -9, y: -9, on: false, a: 0, b: 0 };
+/* -------- confetti -------- */
+const confetti = [];
+const CONFETTI_COLORS = ['#ffd700','#ff9ec4','#b47cff','#fff5f8','#ff6b9d'];
 
-/* ============================================================
-   Char / glyph helpers
-   ============================================================ */
-function getActiveChars() {
-  if (state.mode === 'braille') {
-    const g = new Array(256);
-    for (let i = 0; i < 256; i++) g[i] = String.fromCharCode(0x2800 + i);
-    return g;
+function initConfetti(){
+  for (let i = 0; i < 50; i++){
+    confetti.push({
+      x: Math.random(),
+      y: Math.random() * 1.3 - 0.15,
+      vy: 0.03 + Math.random() * 0.08,
+      vx: (Math.random() - 0.5) * 0.02,
+      w: 3 + Math.random() * 6,
+      h: 2 + Math.random() * 3,
+      rot: Math.random() * Math.PI * 2,
+      rotV: (Math.random() - 0.5) * 0.15,
+      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+    });
   }
-  if (state.mode === 'quadrant') {
-    return [...(' ▘▝▀▖▌▞▛▗▚▐▜▄▙▟█')];
-  }
-  if (state.mode === 'dither') {
-    return [' ', '█'];
-  }
-  return [...(state.customChars || CHARSETS[state.charset] || CHARSETS.classic)];
 }
 
-/* ============================================================
-   Sprite atlas
-   ============================================================ */
-const MAX_SPRITES = 8192;
-const SPRITE_COLS = 64;
-const SPRITE_ROWS = Math.ceil(MAX_SPRITES / SPRITE_COLS);
+function updateConfetti(dt){
+  for (const c of confetti){
+    c.y += c.vy * dt;
+    c.x += c.vx * dt;
+    c.rot += c.rotV * dt;
+    if (c.y > 1.15){ c.y = -0.1; c.x = Math.random(); }
+    if (c.x < -0.05) c.x = 1.05;
+    if (c.x > 1.05) c.x = -0.05;
+  }
+}
 
-function spriteAtlasReset() {
+function renderConfetti(){
+  const w = fx.width, h = fx.height;
+  fxCtx.clearRect(0, 0, w, h);
+  const scale = Math.max(1, w / 800);
+  for (const c of confetti){
+    fxCtx.save();
+    fxCtx.translate(c.x * w, c.y * h);
+    fxCtx.rotate(c.rot);
+    fxCtx.fillStyle = c.color;
+    fxCtx.fillRect(-c.w*scale/2, -c.h*scale/2, c.w*scale, c.h*scale);
+    fxCtx.restore();
+  }
+}
+
+/* -------- blur -------- */
+function blur(src, W, H, sigma){
+  let a = Float32Array.from(src);
+  let b = new Float32Array(src.length);
+  const r = Math.max(1, Math.round(sigma * 2));
+  const pass = (input, output, horizontal) => {
+    const N = horizontal ? W : H;
+    const M = horizontal ? H : W;
+    const stride = horizontal ? 1 : W;
+    const lineStride = horizontal ? W : 1;
+    const inv = 1 / (2 * r + 1);
+    for (let l = 0; l < M; l++){
+      const base = l * lineStride;
+      let sum = input[base] * (r + 1);
+      for (let i = 1; i <= r; i++) sum += input[base + Math.min(i, N-1) * stride];
+      for (let i = 0; i < N; i++){
+        output[base + i*stride] = sum * inv;
+        sum += input[base + Math.min(N-1, i+r+1) * stride];
+        sum -= input[base + Math.max(0, i-r) * stride];
+      }
+    }
+  };
+  pass(a,b,true); [a,b]=[b,a];
+  pass(a,b,true); [a,b]=[b,a];
+  pass(a,b,false);[a,b]=[b,a];
+  pass(a,b,false);[a,b]=[b,a];
+  return a;
+}
+
+/* -------- build scene -------- */
+function build(){
+  if (!src) return;
+  const iw = src.naturalWidth || src.width;
+  const ih = src.naturalHeight || src.height;
+  const C = 180;
+  const R = Math.max(20, Math.round(C * ih / iw * CA));
+  const N = C * R;
+
+  const off = document.createElement('canvas');
+  off.width = C; off.height = R;
+  const oc = off.getContext('2d', { willReadFrequently: true });
+  oc.fillStyle = '#000';
+  oc.fillRect(0, 0, C, R);
+  oc.imageSmoothingQuality = 'high';
+  oc.drawImage(src, 0, 0, C, R);
+  const data = oc.getImageData(0, 0, C, R).data;
+
+  const rgb = new Float32Array(N * 3);
+  const lum = new Float32Array(N);
+  for (let i = 0; i < N; i++){
+    rgb[i*3] = data[i*4] / 255;
+    rgb[i*3+1] = data[i*4+1] / 255;
+    rgb[i*3+2] = data[i*4+2] / 255;
+    lum[i] = 0.299*rgb[i*3] + 0.587*rgb[i*3+1] + 0.114*rgb[i*3+2];
+  }
+
+  const sorted = Array.from(lum).sort((a,b) => a-b);
+  const lo = sorted[Math.floor(sorted.length * 0.03)];
+  const hi = sorted[Math.floor(sorted.length * 0.995)];
+  const span = Math.max(hi - lo, 1e-3);
+  const L = new Float32Array(N);
+  for (let i = 0; i < N; i++) L[i] = clamp((lum[i] - lo) / span, 0, 1);
+
+  const ch = [new Float32Array(N), new Float32Array(N), new Float32Array(N)];
+  for (let i = 0; i < N; i++){
+    const m = Math.max(rgb[i*3], rgb[i*3+1], rgb[i*3+2]) + 1e-4;
+    ch[0][i] = rgb[i*3] / m;
+    ch[1][i] = rgb[i*3+1] / m;
+    ch[2][i] = rgb[i*3+2] / m;
+  }
+
+  const B = blur(L, C, R, 1.8);
+
+  S = {
+    C, R, N, L, B, ch,
+    glyphs: [...CHARSET],
+    gi: new Uint16Array(N),
+    key: new Uint16Array(N),
+    pg: new Uint16Array(N).fill(65535),
+    pk: new Uint16Array(N).fill(65535),
+    sp: new Int32Array(256 * 4096).fill(-1),
+    ns: 0,
+    cw: 8, chh: 16,
+    atlas: null, actx: null,
+  };
+
+  needsCompute = true;
+  needsRender = true;
+  layout();
+}
+
+/* -------- layout -------- */
+function layout(){
   if (!S) return;
+  const stage = $('stage');
+  const d = DPR();
+  const availW = Math.max(64, stage.clientWidth);
+  const availH = Math.max(64, stage.clientHeight);
+
+  const cellW = Math.min(availW / S.C, availH * CA / S.R);
+  const cw = Math.max(3, Math.floor(cellW * d));
+  const chh = Math.max(4, Math.round(cw / CA));
+  S.cw = cw;
+  S.chh = chh;
+
+  if (!S.atlas){
+    S.atlas = document.createElement('canvas');
+    S.actx = S.atlas.getContext('2d');
+  }
+  S.atlas.width = SPRITE_COLS * cw;
+  S.atlas.height = SPRITE_ROWS * chh;
+  const a = S.actx;
+  a.font = Math.round(chh * 0.9) + 'px ui-monospace, Menlo, Consolas, monospace';
+  a.textAlign = 'center';
+  a.textBaseline = 'middle';
   S.sp.fill(-1);
   S.ns = 0;
-  if (S.actx) S.actx.clearRect(0, 0, S.atlas.width, S.atlas.height);
+  a.clearRect(0, 0, S.atlas.width, S.atlas.height);
   S.pg.fill(65535);
   S.pk.fill(65535);
+
+  cv.width = S.C * cw;
+  cv.height = S.R * chh;
+  const fit = Math.min(1, (availW * d) / cv.width, (availH * d) / cv.height);
+  cv.style.width = (cv.width * fit / d) + 'px';
+  cv.style.height = (cv.height * fit / d) + 'px';
+  ctx.imageSmoothingEnabled = false;
+
+  fx.width = cv.width;
+  fx.height = cv.height;
+  fx.style.width = cv.style.width;
+  fx.style.height = cv.style.height;
+  fxCtx.imageSmoothingEnabled = false;
+
+  needsRender = true;
 }
 
-function sprite(g, key) {
+/* -------- sprite cache -------- */
+function sprite(g, key){
   const idx = g * 4096 + key;
   let i = S.sp[idx];
   if (i >= 0) return i;
-  if (S.ns >= MAX_SPRITES) spriteAtlasReset();
+  if (S.ns >= MAX_SPRITES){
+    S.sp.fill(-1);
+    S.ns = 0;
+    S.actx.clearRect(0, 0, S.atlas.width, S.atlas.height);
+  }
   i = S.ns++;
   S.sp[idx] = i;
   const cw = S.cw, chh = S.chh;
   const x = (i % SPRITE_COLS) * cw;
-  const y = ((i / SPRITE_COLS) | 0) * chh;
+  const y = Math.floor(i / SPRITE_COLS) * chh;
   const a = S.actx;
   a.save();
   a.beginPath();
@@ -431,326 +364,49 @@ function sprite(g, key) {
   a.clip();
   a.fillStyle = '#000';
   a.fillRect(x, y, cw, chh);
-  if (g) {
-    const r = (key >> 8 & 15) * 17;
-    const gg = (key >> 4 & 15) * 17;
+  if (g){
+    const r = ((key >> 8) & 15) * 17;
+    const gg = ((key >> 4) & 15) * 17;
     const bb = (key & 15) * 17;
     a.fillStyle = 'rgb(' + r + ',' + gg + ',' + bb + ')';
-    a.fillText(S.glyphs[g] || ' ', x + cw / 2, y + chh / 2 + chh * 0.04);
+    a.fillText(S.glyphs[g] || ' ', x + cw/2, y + chh/2 + chh*0.05);
   }
   a.restore();
   return i;
 }
 
-/* ============================================================
-   Image processing
-   ============================================================ */
-function percentile(arr, p) {
-  const s = Float32Array.from(arr).sort();
-  return s[Math.min(s.length - 1, (p / 100 * s.length) | 0)];
+/* -------- compute (runs once per source change) -------- */
+function compute(){
+  const { N, L, B, ch, gi, key } = S;
+  const nG = S.glyphs.length;
+  for (let i = 0; i < N; i++){
+    let Lf = clamp(L[i], 0, 1);
+    Lf += B[i] * 0.35;
+    Lf = clamp(Lf, 0, 1);
+
+    const g = Math.min(nG - 1, (Lf * nG) | 0);
+    const tint = 0.3 + 0.7 * Lf;
+    const r0 = ch[0][i] * 255 * tint;
+    const g0 = ch[1][i] * 255 * tint;
+    const b0 = ch[2][i] * 255 * tint;
+
+    const qr = Math.min(15, Math.max(0, Math.round(r0 / 17)));
+    const qg = Math.min(15, Math.max(0, Math.round(g0 / 17)));
+    const qb = Math.min(15, Math.max(0, Math.round(b0 / 17)));
+
+    gi[i] = g;
+    key[i] = (qr << 8) | (qg << 4) | qb;
+  }
+  needsCompute = false;
+  needsRender = true;
 }
 
-function build() {
-  if (!src) return;
-  const iw = src.videoWidth || src.naturalWidth || src.width;
-  const ih = src.videoHeight || src.naturalHeight || src.height;
-  const C = live ? Math.min(state.res, 260) : state.res;
-  const R = Math.max(8, Math.round(C * ih / iw * CA));
-  const N = C * R;
-  const HC = C * 2, HR = R * 4, HN = HC * HR;
-
-  const off = document.createElement('canvas');
-  off.width = HC; off.height = HR;
-  const oc = off.getContext('2d', { willReadFrequently: true });
-  oc.fillStyle = '#000';
-  oc.fillRect(0, 0, HC, HR);
-  oc.imageSmoothingQuality = 'high';
-  oc.drawImage(src, 0, 0, HC, HR);
-  const data = oc.getImageData(0, 0, HC, HR).data;
-
-  const hiRGB = new Float32Array(HN * 3);
-  const hiLum = new Float32Array(HN);
-  for (let i = 0; i < HN; i++) {
-    const r = data[i * 4] / 255, g = data[i * 4 + 1] / 255, b = data[i * 4 + 2] / 255;
-    hiRGB[i * 3] = r; hiRGB[i * 3 + 1] = g; hiRGB[i * 3 + 2] = b;
-    hiLum[i] = 0.299 * r + 0.587 * g + 0.114 * b;
-  }
-
-  const rgb = new Float32Array(N * 3);
-  const lum = new Float32Array(N);
-  for (let cy = 0; cy < R; cy++) {
-    for (let cx = 0; cx < C; cx++) {
-      let r = 0, g = 0, b = 0;
-      for (let j = 0; j < 4; j++) for (let i = 0; i < 2; i++) {
-        const k = ((cy * 4 + j) * HC + (cx * 2 + i)) * 3;
-        r += hiRGB[k]; g += hiRGB[k + 1]; b += hiRGB[k + 2];
-      }
-      const n = cy * C + cx;
-      rgb[n * 3] = r / 8; rgb[n * 3 + 1] = g / 8; rgb[n * 3 + 2] = b / 8;
-      lum[n] = 0.299 * rgb[n * 3] + 0.587 * rgb[n * 3 + 1] + 0.114 * rgb[n * 3 + 2];
-    }
-  }
-
-  const lo = percentile(lum, 3);
-  const hi = percentile(lum, 99.5);
-  const span = Math.max(hi - lo, 1e-3);
-  const L = new Float32Array(N);
-  for (let i = 0; i < N; i++) L[i] = clamp((lum[i] - lo) / span, 0, 1);
-  const hiLumNorm = new Float32Array(HN);
-  for (let i = 0; i < HN; i++) hiLumNorm[i] = clamp((hiLum[i] - lo) / span, 0, 1);
-
-  const Ls = blurBuffer(L, C, R, 0.9 / CA, 0.9);
-  const E = new Float32Array(N);
-  for (let y = 0; y < R; y++) for (let x = 0; x < C; x++) {
-    const n = y * C + x;
-    const gx = (Ls[y * C + Math.min(C - 1, x + 1)] - Ls[y * C + Math.max(0, x - 1)]) / 2;
-    const gy = (Ls[Math.min(R - 1, y + 1) * C + x] - Ls[Math.max(0, y - 1) * C + x]) / 2;
-    E[n] = Math.min(1.5, Math.hypot(gx, gy) / CA);
-  }
-
-  const ch = [new Float32Array(N), new Float32Array(N), new Float32Array(N)];
-  for (let i = 0; i < N; i++) {
-    const m = Math.max(rgb[i * 3], rgb[i * 3 + 1], rgb[i * 3 + 2]) + 1e-4;
-    ch[0][i] = rgb[i * 3] / m;
-    ch[1][i] = rgb[i * 3 + 1] / m;
-    ch[2][i] = rgb[i * 3 + 2] / m;
-  }
-
-  const B = blurBuffer(L, C, R, 2.2, 2.2);
-
-  const gi = new Uint16Array(N);
-  const key = new Uint16Array(N);
-  const pg = new Uint16Array(N).fill(65535);
-  const pk = new Uint16Array(N).fill(65535);
-
-  S = {
-    C, R, N, HC, HR, HN,
-    hiRGB, hiLumNorm, rgb, lum, L, E, ch, B,
-    gi, key, pg, pk,
-    glyphs: getActiveChars(),
-    sp: new Int32Array(256 * 4096).fill(-1),
-    ns: 0,
-    cw: 8, chh: 16,
-    atlas: null, actx: null,
-    particles: null,
-    dirty: true,
-  };
-
-  rebuildParticles();
-  layout();
-  replay();
-  updateHUD();
-}
-
-function blurBuffer(srcArr, W, H, sigmaX, sigmaY) {
-  const out = Float32Array.from(srcArr);
-  const tmp = new Float32Array(out.length);
-  const pass = (input, output, radius, horizontal) => {
-    const N = horizontal ? W : H;
-    const M = horizontal ? H : W;
-    const stride = horizontal ? 1 : W;
-    const lineStride = horizontal ? W : 1;
-    const inv = 1 / (2 * radius + 1);
-    for (let l = 0; l < M; l++) {
-      const base = l * lineStride;
-      let sum = input[base] * (radius + 1);
-      for (let i = 1; i <= radius; i++) sum += input[base + Math.min(i, N - 1) * stride];
-      for (let i = 0; i < N; i++) {
-        output[base + i * stride] = sum * inv;
-        sum += input[base + Math.min(N - 1, i + radius + 1) * stride];
-        sum -= input[base + Math.max(0, i - radius) * stride];
-      }
-    }
-  };
-  let srcBuf = out, dstBuf = tmp;
-  for (let k = 0; k < 3; k++) {
-    const r = Math.max(1, Math.round((Math.sqrt(4 * sigmaX * sigmaX + 1) - 1) / 2));
-    pass(srcBuf, dstBuf, r, true);
-    const t = srcBuf; srcBuf = dstBuf; dstBuf = t;
-  }
-  for (let k = 0; k < 3; k++) {
-    const r = Math.max(1, Math.round((Math.sqrt(4 * sigmaY * sigmaY + 1) - 1) / 2));
-    pass(srcBuf, dstBuf, r, false);
-    const t = srcBuf; srcBuf = dstBuf; dstBuf = t;
-  }
-  return srcBuf === out ? out : Float32Array.from(srcBuf);
-}
-
-/* ============================================================
-   Layout
-   ============================================================ */
-function layout() {
-  if (!S) return;
-  const st = $('stage');
-  const d = DPR();
-  const availW = Math.max(64, st.clientWidth - 24);
-  const availH = Math.max(64, st.clientHeight - 24);
-
-  const cellW = Math.max(1.5, Math.min(availW / S.C, availH * CA / S.R));
-  const cw = Math.max(3, Math.floor(cellW * d));
-  const chh = Math.max(4, Math.round(cw / CA));
-  S.cw = cw; S.chh = chh;
-
-  if (!S.atlas) {
-    S.atlas = document.createElement('canvas');
-    S.actx = S.atlas.getContext('2d');
-  }
-  S.atlas.width = SPRITE_COLS * cw;
-  S.atlas.height = SPRITE_ROWS * chh;
-  const a = S.actx;
-  a.font = Math.round(chh * 0.88) + 'px ' + state.font;
-  a.textAlign = 'center';
-  a.textBaseline = 'middle';
-  spriteAtlasReset();
-
-  canvas.width = S.C * cw;
-  canvas.height = S.R * chh;
-  const fit = Math.min(1, availW * d / (S.C * cw), availH * d / (S.R * chh));
-  canvas.style.width = S.C * cw * fit / d + 'px';
-  canvas.style.height = S.R * chh * fit / d + 'px';
-  ctx.imageSmoothingEnabled = false;
-
-  fxCanvas.width = canvas.width;
-  fxCanvas.height = canvas.height;
-  fxCanvas.style.width = canvas.style.width;
-  fxCanvas.style.height = canvas.style.height;
-  fxCtx.imageSmoothingEnabled = false;
-
-  S.dirty = true;
-}
-
-/* ============================================================
-   Filters
-   ============================================================ */
-function applyFilters(l) {
-  let v = (l - 0.5) * state.contrast + 0.5;
-  v = clamp(v, 0, 1) * state.bright;
-  v = clamp(v, 0, 1);
-  if (state.gamma !== 1) v = Math.pow(v, state.gamma);
-  return v;
-}
-
-/* ============================================================
-   Per-frame compute
-   ============================================================ */
-function compute(t, dt) {
-  const { C, R, L, E, ch, B, gi, key, hiLumNorm, HC } = S;
-  const glyphs = S.glyphs;
-  const nG = glyphs.length;
-  const mode = state.mode;
-  const colorMode = state.color;
-
-  // Zoom (visible now: 0..40% range at slider 0..100)
-  const zx = 1 + state.zoom * 0.4 * smooth(t / 12);
-  const zy = zx;
-  const cx = (C - 1) / 2, cy = (R - 1) / 2;
-  const sx = new Int32Array(C), sy = new Int32Array(R);
-  for (let c = 0; c < C; c++) sx[c] = clamp(Math.round((c - cx) / zx + cx), 0, C - 1);
-  for (let r = 0; r < R; r++) sy[r] = clamp(Math.round((r - cy) / zy + cy), 0, R - 1);
-
-  // Breath (visible now: 0..15% brightness swing)
-  const breath = 1 + state.breath * 0.15 * Math.sin(t * 1.7);
-
-  // Wave: horizontal displacement per row, animates over time
-  const waveMag = state.wave * 8;
-
-  const pal = PALETTES[state.pal] ? [hex2rgb(PALETTES[state.pal][0]), hex2rgb(PALETTES[state.pal][1])] : null;
-  const edgeGlyph = Math.max(1, Math.floor(nG * 0.55));
-
-  for (let r = 0; r < R; r++) {
-    const waveOff = Math.sin(r * 0.3 + t * 1.5) * waveMag;
-    const rowBase = sy[r] * C;
-    for (let c = 0; c < C; c++) {
-      const n = r * C + c;
-      const cShift = clamp(Math.round(c + waveOff), 0, C - 1);
-      const j = rowBase + sx[cShift];
-
-      let Lf = applyFilters(L[j]) * breath;
-      Lf += B[j] * state.glow * 0.4;
-
-      if (ptr.a > 0.02) {
-        const dx = (c - ptr.x) * CA, dy = r - ptr.y;
-        const d2 = dx * dx + dy * dy;
-        Lf += ptr.a * Math.exp(-d2 / 24) * 0.5;
-      }
-
-      Lf = clamp(Lf, 0, 1);
-
-      let g = 0;
-      let isEdge = false;
-
-      if (mode === 'ascii') {
-        g = Math.min(nG - 1, (Lf * nG) | 0);
-        if (state.edges && E[j] > 0.55 && Lf > 0.2) {
-          g = edgeGlyph;
-          Lf = Math.min(1, Lf * 1.35);
-          isEdge = true;
-        }
-      } else if (mode === 'dither') {
-        const bayer = BAYER8[(r & 7) * 8 + (c & 7)] / 64;
-        g = Lf > bayer ? 1 : 0;
-      } else if (mode === 'braille') {
-        let bits = 0;
-        const bmap = [[0, 1, 2, 6], [3, 4, 5, 7]];
-        for (let jj = 0; jj < 4; jj++) for (let ii = 0; ii < 2; ii++) {
-          const hi = ((r * 4 + jj) * HC + (c * 2 + ii));
-          if (hiLumNorm[hi] > 0.5) bits |= 1 << bmap[ii][jj];
-        }
-        g = bits;
-      } else if (mode === 'quadrant') {
-        let bits = 0;
-        const qAvg = (ci, r0, r1) => {
-          let s = 0;
-          for (let rr = r0; rr <= r1; rr++) s += hiLumNorm[(r * 4 + rr) * HC + (c * 2 + ci)];
-          return s / (r1 - r0 + 1);
-        };
-        if (qAvg(0, 0, 1) > 0.5) bits |= 1;
-        if (qAvg(1, 0, 1) > 0.5) bits |= 2;
-        if (qAvg(0, 2, 3) > 0.5) bits |= 4;
-        if (qAvg(1, 2, 3) > 0.5) bits |= 8;
-        g = bits;
-      }
-
-      let r0, g0, b0;
-      if (colorMode === 'mono') {
-        const v = clamp(Lf * 2, 0, 1) * 255;
-        r0 = g0 = b0 = v;
-      } else if (colorMode === 'original') {
-        r0 = S.rgb[j * 3] * 255;
-        g0 = S.rgb[j * 3 + 1] * 255;
-        b0 = S.rgb[j * 3 + 2] * 255;
-      } else if (colorMode === 'chroma') {
-        const boost = isEdge ? 1.25 : 1;
-        r0 = Math.min(255, ch[0][j] * 255 * (0.3 + 0.7 * Lf) * boost);
-        g0 = Math.min(255, ch[1][j] * 255 * (0.3 + 0.7 * Lf) * boost);
-        b0 = Math.min(255, ch[2][j] * 255 * (0.3 + 0.7 * Lf) * boost);
-      } else if (colorMode === 'palette' && pal) {
-        r0 = lerp(pal[0][0], pal[1][0], Lf);
-        g0 = lerp(pal[0][1], pal[1][1], Lf);
-        b0 = lerp(pal[0][2], pal[1][2], Lf);
-      } else {
-        const v = clamp(Lf * 2, 0, 1) * 255;
-        r0 = g0 = b0 = v;
-      }
-
-      const qr = Math.min(15, Math.max(0, Math.round(r0 / 17)));
-      const qg = Math.min(15, Math.max(0, Math.round(g0 / 17)));
-      const qb = Math.min(15, Math.max(0, Math.round(b0 / 17)));
-
-      gi[n] = g;
-      key[n] = (qr << 8) | (qg << 4) | qb;
-    }
-  }
-}
-
-/* ============================================================
-   Render
-   ============================================================ */
-function render() {
+/* -------- render (draws only changed cells) -------- */
+function render(){
   const { C, R, cw, chh, gi, key, pg, pk, atlas } = S;
-  for (let r = 0; r < R; r++) {
+  for (let r = 0; r < R; r++){
     const y = r * chh;
-    for (let c = 0; c < C; c++) {
+    for (let c = 0; c < C; c++){
       const n = r * C + c;
       const g = gi[n];
       const k = g ? key[n] : 0;
@@ -759,745 +415,193 @@ function render() {
       pk[n] = k;
       const i = sprite(g, k);
       const sx = (i % SPRITE_COLS) * cw;
-      const sy = ((i / SPRITE_COLS) | 0) * chh;
+      const sy = Math.floor(i / SPRITE_COLS) * chh;
       ctx.drawImage(atlas, sx, sy, cw, chh, c * cw, y, cw, chh);
     }
   }
-  applyPostFX();
+  needsRender = false;
 }
 
-function applyPostFX() {
-  const w = canvas.width, h = canvas.height;
-  fxCtx.clearRect(0, 0, w, h);
-
-  if (state.bloom > 0) {
-    fxCtx.save();
-    fxCtx.filter = 'blur(' + state.bloom + 'px)';
-    fxCtx.globalCompositeOperation = 'lighter';
-    fxCtx.drawImage(canvas, 0, 0);
-    fxCtx.restore();
-  }
-  if (state.scan > 0) {
-    const alpha = state.scan / 200;
-    fxCtx.fillStyle = 'rgba(0,0,0,' + alpha + ')';
-    for (let y = 0; y < h; y += 2) fxCtx.fillRect(0, y, w, 1);
-  }
-  if (state.vig > 0) {
-    const g = fxCtx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.2, w / 2, h / 2, Math.max(w, h) * 0.7);
-    g.addColorStop(0, 'rgba(0,0,0,0)');
-    g.addColorStop(1, 'rgba(0,0,0,' + (state.vig / 100) + ')');
-    fxCtx.fillStyle = g;
-    fxCtx.fillRect(0, 0, w, h);
-  }
-}
-
-/* ============================================================
-   Particles — run AFTER compute so they overlay the image
-   ============================================================ */
-function rebuildParticles() {
+/* -------- main loop (only confetti animates) -------- */
+function frame(ts){
+  requestAnimationFrame(frame);
   if (!S) return;
-  const { C, R } = S;
-  const base = Math.max(40, Math.floor((C * R) / 90));
-  const count = Math.floor(base * state.pdensity);
-  const pp = {
-    x: new Float32Array(count), y: new Float32Array(count),
-    vx: new Float32Array(count), vy: new Float32Array(count),
-    ph: new Float32Array(count),
-  };
-  for (let i = 0; i < count; i++) {
-    pp.x[i] = Math.random() * C;
-    pp.y[i] = Math.random() * R;
-    pp.ph[i] = Math.random() * Math.PI * 2;
-    switch (state.ptype) {
-      case 'embers': pp.vy[i] = -(1.5 + Math.random() * 3); pp.vx[i] = rand(-0.3, 0.3); break;
-      case 'snow':   pp.vy[i] = 0.3 + Math.random() * 1.0;  pp.vx[i] = rand(-0.4, 0.4); break;
-      case 'rain':   pp.vy[i] = 4 + Math.random() * 6;      pp.vx[i] = -0.5;            break;
-      case 'stars':  pp.vy[i] = 0;                          pp.vx[i] = 0;               break;
-      case 'dust':   pp.vy[i] = -(0.2 + Math.random() * 0.6); pp.vx[i] = rand(-0.2, 0.2); break;
-      case 'sparkle':pp.vy[i] = rand(-0.5, 0.5);            pp.vx[i] = rand(-0.5, 0.5); break;
-    }
-  }
-  S.particles = pp;
+
+  const dt = Math.min(0.1, (ts - lastFrame) / 1000);
+  lastFrame = ts;
+
+  if (needsCompute) compute();
+  if (needsRender) render();
+
+  updateConfetti(dt);
+  renderConfetti();
 }
 
-function updateParticles(t, dt) {
-  if (!S || !S.particles || state.ptype === 'none') return;
-  const pp = S.particles;
-  const { C, R, gi, key, glyphs } = S;
-  const count = pp.x.length;
-  const nG = glyphs.length;
-  if (!nG) return;
-  // Pick a bright glyph for particles (75% up the charset)
-  const pGlyphIdx = Math.floor(nG * 0.85);
-  const pGlyph = glyphs[pGlyphIdx] || glyphs[nG - 1] || '.';
+/* -------- birthday cake (procedural) -------- */
+function makeCake(){
+  const c = document.createElement('canvas');
+  c.width = c.height = 800;
+  const g = c.getContext('2d');
 
-  for (let i = 0; i < count; i++) {
-    if (ptr.a > 0.02) {
-      const dx = (pp.x[i] - ptr.x) * CA, dy = pp.y[i] - ptr.y;
-      const d2 = dx * dx + dy * dy;
-      const rp = 6;
-      if (d2 < rp * rp && d2 > 1e-3) {
-        const d = Math.sqrt(d2);
-        const fp = (1 - d / rp) * 40 * dt * ptr.a;
-        pp.x[i] += (dx / d) * fp / CA;
-        pp.y[i] += (dy / d) * fp;
-      }
-    }
-    if (state.ptype === 'snow' || state.ptype === 'dust' || state.ptype === 'sparkle') {
-      pp.x[i] += Math.sin(t * 0.8 + pp.ph[i]) * 0.6 * dt;
-    }
-    pp.x[i] += pp.vx[i] * dt;
-    pp.y[i] += pp.vy[i] * dt;
-    if (pp.y[i] < 0) { pp.y[i] = R - 1; pp.x[i] = Math.random() * C; }
-    if (pp.y[i] >= R) { pp.y[i] = 0; pp.x[i] = Math.random() * C; }
-    if (pp.x[i] < 0) pp.x[i] = C - 1;
-    if (pp.x[i] >= C) pp.x[i] = 0;
+  // Background glow
+  const bg = g.createRadialGradient(400, 350, 40, 400, 400, 500);
+  bg.addColorStop(0, '#2a0a20');
+  bg.addColorStop(0.5, '#150812');
+  bg.addColorStop(1, '#050008');
+  g.fillStyle = bg;
+  g.fillRect(0, 0, 800, 800);
 
-    const x = pp.x[i] | 0, y = pp.y[i] | 0;
-    if (x < 0 || x >= C || y < 0 || y >= R) continue;
-    const n = y * C + x;
-    // Only paint over dark cells (glyph index 0 or 1)
-    if (gi[n] >= 2) continue;
+  // Plate
+  g.fillStyle = '#ffc8dc';
+  g.beginPath(); g.ellipse(400, 645, 320, 55, 0, 0, Math.PI*2); g.fill();
+  g.fillStyle = '#ffe8f0';
+  g.beginPath(); g.ellipse(400, 640, 320, 55, 0, 0, Math.PI*2); g.fill();
 
-    let lf = 0.4;
-    let cr = 180, cg = 180, cb = 200;
-    if (state.ptype === 'embers') { lf = 0.6 + 0.4 * (0.5 + 0.5 * Math.sin(t * 3 + pp.ph[i] * 3)); cr = 255; cg = 150; cb = 40; }
-    else if (state.ptype === 'stars') { lf = 0.5 + 0.5 * Math.sin(t * 2 + pp.ph[i] * 5); cr = 255; cg = 255; cb = 255; }
-    else if (state.ptype === 'snow') { lf = 0.7; cr = 220; cg = 240; cb = 255; }
-    else if (state.ptype === 'rain') { lf = 0.5; cr = 140; cg = 180; cb = 255; }
-    else if (state.ptype === 'sparkle') { lf = 0.5 + 0.5 * Math.sin(t * 6 + pp.ph[i] * 8); cr = 255; cg = 200; cb = 240; }
-    else if (state.ptype === 'dust') { lf = 0.3; cr = 180; cg = 180; cb = 200; }
-
-    const m = clamp(lf, 0, 1);
-    const qr = Math.min(15, Math.round(cr / 17 * m));
-    const qg = Math.min(15, Math.round(cg / 17 * m));
-    const qb = Math.min(15, Math.round(cb / 17 * m));
-
-    gi[n] = pGlyphIdx;
-    key[n] = (qr << 8) | (qg << 4) | qb;
+  // Bottom tier
+  g.fillStyle = '#f5b3d1';
+  g.fillRect(180, 440, 440, 200);
+  g.fillStyle = '#fff5f8';
+  g.beginPath();
+  g.moveTo(180, 440);
+  for (let i = 0; i <= 22; i++){
+    const x = 180 + i*20;
+    const y = 440 + (i%2===0 ? -18 : 0);
+    g.lineTo(x, y);
   }
+  g.lineTo(620, 440); g.lineTo(620, 470); g.lineTo(180, 470);
+  g.closePath(); g.fill();
+
+  // Middle tier
+  g.fillStyle = '#e896bb';
+  g.fillRect(250, 320, 300, 140);
+  g.fillStyle = '#fff5f8';
+  g.beginPath();
+  g.moveTo(250, 320);
+  for (let i = 0; i <= 15; i++){
+    const x = 250 + i*20;
+    const y = 320 + (i%2===0 ? -16 : 0);
+    g.lineTo(x, y);
+  }
+  g.lineTo(550, 320); g.lineTo(550, 348); g.lineTo(250, 348);
+  g.closePath(); g.fill();
+
+  // Top tier
+  g.fillStyle = '#d47da8';
+  g.fillRect(310, 230, 180, 90);
+  g.fillStyle = '#fff5f8';
+  g.beginPath();
+  g.moveTo(310, 230);
+  for (let i = 0; i <= 9; i++){
+    const x = 310 + i*20;
+    const y = 230 + (i%2===0 ? -14 : 0);
+    g.lineTo(x, y);
+  }
+  g.lineTo(490, 230); g.lineTo(490, 252); g.lineTo(310, 252);
+  g.closePath(); g.fill();
+
+  // Candles
+  const candleXs = [345, 400, 455];
+  for (const cx of candleXs){
+    g.fillStyle = '#fff5f8';
+    g.fillRect(cx-7, 160, 14, 70);
+    g.fillStyle = '#ff6b9d';
+    g.fillRect(cx-7, 165, 14, 8);
+    g.fillRect(cx-7, 185, 14, 8);
+    g.fillRect(cx-7, 205, 14, 8);
+    g.fillStyle = '#333';
+    g.fillRect(cx-1, 152, 2, 10);
+    // Flame glow
+    const flame = g.createRadialGradient(cx, 138, 1, cx, 138, 28);
+    flame.addColorStop(0, '#fffbe0');
+    flame.addColorStop(0.4, '#ffd700');
+    flame.addColorStop(0.8, '#ff8800');
+    flame.addColorStop(1, 'rgba(255,80,0,0)');
+    g.fillStyle = flame;
+    g.beginPath(); g.arc(cx, 138, 28, 0, Math.PI*2); g.fill();
+    // Flame core
+    g.fillStyle = '#fffacd';
+    g.beginPath(); g.ellipse(cx, 138, 5, 12, 0, 0, Math.PI*2); g.fill();
+  }
+
+  // Sprinkles
+  const spr = ['#ffd700','#ff6b9d','#b47cff','#fff5f8','#ff9ec4'];
+  for (let i = 0; i < 80; i++){
+    const x = 180 + Math.random() * 440;
+    const y = 250 + Math.random() * 380;
+    g.fillStyle = spr[Math.floor(Math.random() * spr.length)];
+    g.fillRect(x, y, 5, 3);
+  }
+
+  const im = new Image();
+  im.onload = () => setSource(im);
+  im.src = c.toDataURL();
 }
 
-/* ============================================================
-   Live source (video / webcam) — with cached canvas
-   ============================================================ */
-function getLiveCanvas(w, h) {
-  if (!liveCanvas) {
-    liveCanvas = document.createElement('canvas');
-    liveCtx = liveCanvas.getContext('2d', { willReadFrequently: true });
-  }
-  if (liveCanvas.width !== w || liveCanvas.height !== h) {
-    liveCanvas.width = w;
-    liveCanvas.height = h;
-  }
-  return liveCtx;
+/* -------- source management -------- */
+function setSource(s){
+  src = s;
+  build();
 }
 
-function liveUpdate() {
-  if (!S || !vid || vid.readyState < 2) return;
-  const { C, R, L, B, ch, hiLumNorm, HC, hiRGB, rgb } = S;
-  const H = R * 4;
-
-  const lctx = getLiveCanvas(HC, H);
-  lctx.setTransform(mirror ? -1 : 1, 0, 0, 1, mirror ? HC : 0, 0);
-  lctx.drawImage(vid, 0, 0, HC, H);
-  lctx.setTransform(1, 0, 0, 1, 0, 0);
-  const d = lctx.getImageData(0, 0, HC, H).data;
-
-  for (let i = 0; i < HC * H; i++) {
-    const r = d[i * 4] / 255, g = d[i * 4 + 1] / 255, b = d[i * 4 + 2] / 255;
-    hiRGB[i * 3] = r; hiRGB[i * 3 + 1] = g; hiRGB[i * 3 + 2] = b;
-    hiLumNorm[i] = 0.299 * r + 0.587 * g + 0.114 * b;
-  }
-
-  let lo = 1, hi = 0;
-  for (let i = 0; i < HC * H; i += 7) {
-    const v = hiLumNorm[i];
-    if (v < lo) lo = v;
-    if (v > hi) hi = v;
-  }
-  const span = Math.max(hi - lo, 0.05);
-  for (let i = 0; i < HC * H; i++) {
-    hiLumNorm[i] = clamp((hiLumNorm[i] - lo) / span, 0, 1);
-  }
-
-  for (let cy = 0; cy < R; cy++) for (let cx = 0; cx < C; cx++) {
-    let r = 0, g = 0, b = 0;
-    for (let j = 0; j < 4; j++) for (let i = 0; i < 2; i++) {
-      const k = ((cy * 4 + j) * HC + (cx * 2 + i)) * 3;
-      r += hiRGB[k]; g += hiRGB[k + 1]; b += hiRGB[k + 2];
-    }
-    const n = cy * C + cx;
-    rgb[n * 3] = r / 8; rgb[n * 3 + 1] = g / 8; rgb[n * 3 + 2] = b / 8;
-    L[n] = clamp(0.299 * rgb[n * 3] + 0.587 * rgb[n * 3 + 1] + 0.114 * rgb[n * 3 + 2], 0, 1);
-    B[n] = L[n] * L[n] * 0.45;
-    const m = Math.max(rgb[n * 3], rgb[n * 3 + 1], rgb[n * 3 + 2]) + 1e-4;
-    ch[0][n] = rgb[n * 3] / m;
-    ch[1][n] = rgb[n * 3 + 1] / m;
-    ch[2][n] = rgb[n * 3 + 2] / m;
-  }
-}
-
-/* ============================================================
-   Source management
-   ============================================================ */
-function stopLive() {
-  live = false;
-  if (vid) {
-    try {
-      vid.pause();
-      if (vid.srcObject) vid.srcObject.getTracks().forEach(tr => tr.stop());
-    } catch (e) {}
-    vid = null;
-  }
-}
-
-function setImage(im) { stopLive(); src = im; build(); }
-
-function loadImageFile(file) {
+function loadPhoto(file){
   if (!file || !file.type.startsWith('image/')) return;
   const fr = new FileReader();
   fr.onload = () => {
     const im = new Image();
-    im.onload = () => setImage(im);
+    im.onload = () => { setSource(im); toast('Looking good'); };
     im.onerror = () => toast('Could not read that image');
     im.src = fr.result;
   };
   fr.readAsDataURL(file);
 }
 
-function loadImageFiles(files) {
-  const list = [...files].filter(f => f.type.startsWith('image/'));
-  if (!list.length) return;
-  Promise.all(list.map(f => new Promise(res => {
-    const fr = new FileReader();
-    fr.onload = () => {
-      const im = new Image();
-      im.onload = () => res(im);
-      im.onerror = () => res(null);
-      im.src = fr.result;
-    };
-    fr.readAsDataURL(f);
-  }))).then(arr => {
-    playlist = arr.filter(Boolean);
-    pi = 0;
-    if (playlist.length) {
-      setImage(playlist[0]);
-      slideTimer = now();
-      if (playlist.length > 1) toast(playlist.length + ' images loaded');
-    }
+/* -------- UI wiring -------- */
+function initUI(){
+  const nameInput = $('nameInput');
+  const greeting = $('greeting');
+  nameInput.addEventListener('input', () => {
+    const name = nameInput.value.trim();
+    greeting.textContent = name ? 'Happy Birthday, ' + name : 'Happy Birthday';
   });
-}
 
-function goLive(v, mir) {
-  stopLive();
-  vid = v;
-  mirror = mir;
-  v.onerror = () => toast('Could not play that video');
-  v.play().catch(() => {});
-  const go = () => { src = v; live = true; build(); };
-  if (v.videoWidth) go();
-  else v.addEventListener('loadeddata', go, { once: true });
-}
+  $('uploadBtn').addEventListener('click', () => $('fileInput').click());
+  $('fileInput').addEventListener('change', e => loadPhoto(e.target.files[0]));
 
-function startCamera() {
-  const v = document.createElement('video');
-  v.muted = true;
-  v.playsInline = true;
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640 } })
-    .then(stream => { v.srcObject = stream; goLive(v, true); })
-    .catch(() => toast('Camera not available'));
-}
+  $('cakeBtn').addEventListener('click', () => {
+    makeCake();
+    toast('🎂');
+  });
 
-/* ============================================================
-   Playback
-   ============================================================ */
-function replay() {
-  t0 = now();
-  lastFrame = t0;
-  pauseAt = t0;
-  if (S) S.dirty = true;
-}
+  const dz = $('dropzone');
+  ['dragenter', 'dragover'].forEach(ev => addEventListener(ev, e => {
+    e.preventDefault();
+    dz.classList.add('show');
+  }));
+  ['dragleave', 'drop'].forEach(ev => addEventListener(ev, e => {
+    e.preventDefault();
+    if (ev === 'drop' && e.dataTransfer.files[0]) loadPhoto(e.dataTransfer.files[0]);
+    dz.classList.remove('show');
+  }));
 
-function togglePause() {
-  paused = !paused;
-  $('btn-pause').textContent = paused ? 'Play' : 'Pause';
-  if (paused) pauseAt = now();
-  else { const d = now() - pauseAt; t0 += d; lastFrame += d; }
-}
-
-function toggleFullscreen() {
-  if (document.fullscreenElement) document.exitFullscreen();
-  else document.documentElement.requestFullscreen().catch(() => {});
-}
-
-function showPlaylist(i) {
-  if (!playlist.length) return;
-  pi = (i + playlist.length) % playlist.length;
-  setImage(playlist[pi]);
-  slideTimer = now();
-}
-
-/* ============================================================
-   Main loop — fixed order, fixed FPS, fixed auto-quality
-   ============================================================ */
-function frame(ts) {
-  requestAnimationFrame(frame);
-  if (!S || (paused && !S.dirty) || ts - lastDraw < 28) return;
-
-  const dtDraw = ts - lastDraw;   // capture BEFORE overwriting
-  lastDraw = ts;
-  S.dirty = false;
-
-  const t = ((paused ? pauseAt : ts) - t0) / 1000 * state.speed;
-  const dt = paused ? 0 : Math.min(0.1, (ts - lastFrame) / 1000) * state.speed;
-  lastFrame = ts;
-
-  if (live && !paused && vid && vid.readyState >= 2) liveUpdate();
-
-  // Order matters: compute first, particles overlay on top
-  compute(t, dt);
-  updateParticles(t, dt);
-  render();
-
-  // FPS — proper delta
-  const instantFps = 1000 / Math.max(1, dtDraw);
-  emaFps = emaFps * 0.92 + instantFps * 0.08;
-  frameCount++;
-  $('fps').textContent = Math.round(emaFps);
-
-  // Auto-quality downscale
-  if (frameCount > 45 && state.autoq && !paused && S.C > 100 && ts - lastAdapt > 2500) {
-    if (emaFps < 25) {
-      lastAdapt = ts;
-      frameCount = 0;
-      const nr = Math.max(90, Math.floor(S.C * 0.82 / 10) * 10);
-      state.res = nr;
-      $('res').value = nr;
-      $('res-out').textContent = nr;
-      build();
-    } else if (emaFps > 58 && S.C < state.res && state.res < 500) {
-      // Recovery: if consistently fast, try bumping up
-      lastAdapt = ts;
-      frameCount = 0;
-      const nr = Math.min(state.res, Math.floor(S.C * 1.15 / 10) * 10);
-      if (nr !== S.C) {
-        $('res').value = nr;
-        $('res-out').textContent = nr;
-        build();
+  addEventListener('paste', e => {
+    for (const item of e.clipboardData.items){
+      if (item.type.startsWith('image/')){
+        loadPhoto(item.getAsFile());
+        break;
       }
     }
-  }
-}
-
-function updateHUD() {
-  if (!S) return;
-  $('hres').textContent = S.C + '×' + S.R;
-  $('hmode').textContent = state.mode;
-}
-
-/* ============================================================
-   Presets
-   ============================================================ */
-let currentPreset = 'Classic';
-
-function applyPreset(name) {
-  const p = PRESETS.find(x => x.name === name);
-  if (!p) return;
-  Object.assign(state, p.s);
-  currentPreset = name;
-  syncUI();
-  if (src) build();
-  toast('Preset: ' + name);
-}
-
-function syncUI() {
-  const setVal = (id, v) => { const el = $(id); if (el) el.value = v; };
-  const setOut = (id, v) => { const el = $(id + '-out'); if (el) el.textContent = v; };
-  setVal('mode', state.mode);
-  setVal('charset', state.charset);
-  setVal('color', state.color);
-  setVal('pal', state.pal);
-  setVal('res', state.res); setOut('res', state.res);
-  setVal('bright', Math.round(state.bright * 100)); setOut('bright', state.bright.toFixed(2));
-  setVal('contrast', Math.round(state.contrast * 100)); setOut('contrast', state.contrast.toFixed(2));
-  setVal('gamma', Math.round(state.gamma * 100)); setOut('gamma', state.gamma.toFixed(2));
-  setVal('glow', Math.round(state.glow * 100)); setOut('glow', Math.round(state.glow * 100));
-  setVal('bloom', state.bloom); setOut('bloom', state.bloom);
-  setVal('scan', state.scan); setOut('scan', state.scan);
-  setVal('vig', state.vig); setOut('vig', state.vig);
-  setVal('zoom', Math.round(state.zoom * 100)); setOut('zoom', Math.round(state.zoom * 100));
-  setVal('breath', Math.round(state.breath * 100)); setOut('breath', Math.round(state.breath * 100));
-  setVal('wave', Math.round(state.wave * 100)); setOut('wave', Math.round(state.wave * 100));
-  setVal('speed', Math.round(state.speed * 100)); setOut('speed', state.speed.toFixed(2));
-  setVal('ptype', state.ptype);
-  setVal('pdensity', Math.round(state.pdensity * 100)); setOut('pdensity', Math.round(state.pdensity * 100));
-  $('edges').checked = state.edges;
-  $('autoq').checked = state.autoq;
-  $('row-charset').style.display = state.mode === 'ascii' ? '' : 'none';
-  $('row-pal').style.display = state.color === 'palette' ? '' : 'none';
-
-  document.querySelectorAll('#presets button').forEach(b => {
-    b.classList.toggle('active', b.dataset.name === currentPreset);
   });
-
-  if (S) rebuildParticles();
-}
-
-/* ============================================================
-   UI wiring
-   ============================================================ */
-function bindSlider(id, key, mult, fmt) {
-  const el = $(id), out = $(id + '-out');
-  el.addEventListener('input', () => {
-    const v = +el.value;
-    state[key] = mult ? v / mult : v;
-    if (out) out.textContent = fmt ? fmt(state[key]) : v;
-    if (S) S.dirty = true;
-    markCustom();
-  });
-}
-
-function bindSelect(id, key, cb) {
-  const el = $(id);
-  el.addEventListener('change', () => {
-    state[key] = el.value;
-    if (cb) cb();
-    if (S) S.dirty = true;
-    markCustom();
-  });
-}
-
-function markCustom() {
-  currentPreset = '__custom__';
-  document.querySelectorAll('#presets button').forEach(b => b.classList.remove('active'));
-}
-
-function initUI() {
-  const cs = $('charset');
-  for (const k in CHARSETS) {
-    const o = document.createElement('option');
-    o.value = k; o.textContent = k.charAt(0).toUpperCase() + k.slice(1);
-    cs.appendChild(o);
-  }
-  cs.value = state.charset;
-
-  const ps = $('pal');
-  for (const k in PALETTES) {
-    const o = document.createElement('option');
-    o.value = k; o.textContent = k.charAt(0).toUpperCase() + k.slice(1);
-    ps.appendChild(o);
-  }
-  ps.value = state.pal;
-
-  const pr = $('presets');
-  for (const p of PRESETS) {
-    const b = document.createElement('button');
-    b.textContent = p.name;
-    b.dataset.name = p.name;
-    b.addEventListener('click', () => applyPreset(p.name));
-    pr.appendChild(b);
-  }
-
-  bindSlider('res', 'res', 1, v => v);
-  bindSlider('bright', 'bright', 100, v => v.toFixed(2));
-  bindSlider('contrast', 'contrast', 100, v => v.toFixed(2));
-  bindSlider('gamma', 'gamma', 100, v => v.toFixed(2));
-  bindSlider('glow', 'glow', 100, v => Math.round(v * 100));
-  bindSlider('bloom', 'bloom', 1, v => v);
-  bindSlider('scan', 'scan', 1, v => v);
-  bindSlider('vig', 'vig', 1, v => v);
-  bindSlider('zoom', 'zoom', 100, v => Math.round(v * 100));
-  bindSlider('breath', 'breath', 100, v => Math.round(v * 100));
-  bindSlider('wave', 'wave', 100, v => Math.round(v * 100));
-  bindSlider('speed', 'speed', 100, v => v.toFixed(2));
-  bindSlider('pdensity', 'pdensity', 100, v => Math.round(v * 100));
-
-  // Density requires particle rebuild
-  $('pdensity').addEventListener('change', () => { if (S) rebuildParticles(); });
-  // Resolution requires full rebuild
-  $('res').addEventListener('change', () => { if (src) build(); });
-
-  bindSelect('mode', 'mode', () => {
-    $('row-charset').style.display = state.mode === 'ascii' ? '' : 'none';
-    if (S) { S.glyphs = getActiveChars(); spriteAtlasReset(); }
-  });
-  bindSelect('charset', 'charset', () => { if (S) { S.glyphs = getActiveChars(); spriteAtlasReset(); } });
-  bindSelect('color', 'color', () => {
-    $('row-pal').style.display = state.color === 'palette' ? '' : 'none';
-  });
-  bindSelect('pal', 'pal');
-  bindSelect('font', 'font', () => { if (S) layout(); });
-  bindSelect('ptype', 'ptype', () => { if (S) rebuildParticles(); });
-
-  $('edges').addEventListener('change', () => { state.edges = $('edges').checked; if (S) S.dirty = true; markCustom(); });
-  $('autoq').addEventListener('change', () => { state.autoq = $('autoq').checked; markCustom(); });
-
-  $('custom-chars').addEventListener('input', () => {
-    state.customChars = $('custom-chars').value;
-    if (S) { S.glyphs = getActiveChars(); spriteAtlasReset(); }
-  });
-
-  $('btn-open').addEventListener('click', () => $('file-img').click());
-  $('btn-video').addEventListener('click', () => $('file-vid').click());
-  $('btn-cam').addEventListener('click', startCamera);
-  $('btn-replay').addEventListener('click', replay);
-  $('btn-pause').addEventListener('click', togglePause);
-  $('btn-fs').addEventListener('click', toggleFullscreen);
-  $('btn-help').addEventListener('click', () => $('help').classList.add('show'));
-  $('help-close').addEventListener('click', () => $('help').classList.remove('show'));
-
-  $('file-img').addEventListener('change', e => loadImageFiles(e.target.files));
-  $('file-vid').addEventListener('change', e => {
-    const f = e.target.files[0];
-    if (!f) return;
-    const v = document.createElement('video');
-    v.muted = true; v.loop = true; v.playsInline = true;
-    v.src = URL.createObjectURL(f);
-    goLive(v, false);
-  });
-
-  $('toggle').addEventListener('click', () => $('panel').classList.toggle('open'));
-
-  $('btn-png').addEventListener('click', exportPNG);
-  $('btn-txt').addEventListener('click', exportTXT);
-  $('btn-webm').addEventListener('click', toggleRecord);
-  $('btn-json').addEventListener('click', exportJSON);
 
   addEventListener('resize', layout);
   addEventListener('orientationchange', () => setTimeout(layout, 100));
 }
 
-/* ============================================================
-   Export
-   ============================================================ */
-function download(filename, blob) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 4000);
-}
-
-function compositeCanvas() {
-  const out = document.createElement('canvas');
-  out.width = canvas.width; out.height = canvas.height;
-  const octx = out.getContext('2d');
-  octx.drawImage(canvas, 0, 0);
-  octx.drawImage(fxCanvas, 0, 0);
-  return out;
-}
-
-function exportPNG() {
-  if (!canvas) return;
-  compositeCanvas().toBlob(b => {
-    if (b) { download('ascii-buildme.png', b); toast('PNG saved'); }
-  }, 'image/png');
-}
-
-function exportTXT() {
-  if (!S) return;
-  const { C, R, gi, glyphs } = S;
-  let out = '';
-  for (let r = 0; r < R; r++) {
-    let line = '';
-    for (let c = 0; c < C; c++) line += glyphs[gi[r * C + c]] || ' ';
-    out += line + '\n';
-  }
-  download('ascii-buildme.txt', new Blob([out], { type: 'text/plain' }));
-  toast('TXT saved');
-}
-
-function exportJSON() {
-  const cfg = { ...state, version: 'ultra-2' };
-  download('ascii-buildme.json', new Blob([JSON.stringify(cfg, null, 2)], { type: 'application/json' }));
-  toast('Config saved');
-}
-
-function startRecComposite() {
-  stopRecComposite();
-  recComp = document.createElement('canvas');
-  recComp.width = canvas.width;
-  recComp.height = canvas.height;
-  recCompCtx = recComp.getContext('2d');
-  const draw = () => {
-    if (!recComp) return;
-    recCompCtx.drawImage(canvas, 0, 0);
-    recCompCtx.drawImage(fxCanvas, 0, 0);
-    recRafHandle = requestAnimationFrame(draw);
-  };
-  draw();
-  return recComp;
-}
-
-function stopRecComposite() {
-  if (recRafHandle) cancelAnimationFrame(recRafHandle);
-  recRafHandle = null;
-  recComp = null;
-  recCompCtx = null;
-}
-
-function toggleRecord() {
-  const btn = $('btn-webm');
-  if (recorder) { recorder.stop(); return; }
-  if (!window.MediaRecorder) { toast('Recording not supported here'); return; }
-  const target = startRecComposite();
-  if (!target.captureStream) { stopRecComposite(); toast('captureStream unsupported'); return; }
-  const types = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
-  const mt = types.find(t => MediaRecorder.isTypeSupported(t));
-  const stream = target.captureStream(30);
-  const parts = [];
-  recorder = new MediaRecorder(stream, mt ? { mimeType: mt, videoBitsPerSecond: 8e6 } : {});
-  recorder.ondataavailable = e => { if (e.data.size) parts.push(e.data); };
-  recorder.onstop = () => {
-    clearTimeout(recordTimer);
-    btn.textContent = 'Record WebM';
-    const blob = new Blob(parts, { type: 'video/webm' });
-    recorder = null;
-    stopRecComposite();
-    if (blob.size) { download('ascii-buildme.webm', blob); toast('WebM saved'); }
-  };
-  recorder.start(500);
-  btn.textContent = 'Stop ●';
-  recordTimer = setTimeout(() => { if (recorder) recorder.stop(); }, 30000);
-}
-
-/* ============================================================
-   Keyboard
-   ============================================================ */
-function bindKeyboard() {
-  addEventListener('keydown', e => {
-    const tag = (e.target.tagName || '').toLowerCase();
-    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
-
-    if (e.key === ' ') { e.preventDefault(); togglePause(); }
-    else if (e.key === 'r' || e.key === 'R') replay();
-    else if (e.key === 'f' || e.key === 'F') toggleFullscreen();
-    else if (e.key === 'h' || e.key === 'H') $('panel').classList.toggle('open');
-    else if (e.key === 'm' || e.key === 'M') {
-      const modes = ['chroma', 'mono', 'original', 'palette'];
-      state.color = modes[(modes.indexOf(state.color) + 1) % modes.length];
-      syncUI();
-      if (S) S.dirty = true;
-      toast('Color: ' + state.color);
-    }
-    else if (e.key === 'v' || e.key === 'V') {
-      const modes = ['ascii', 'braille', 'quadrant', 'dither'];
-      state.mode = modes[(modes.indexOf(state.mode) + 1) % modes.length];
-      $('mode').value = state.mode;
-      $('row-charset').style.display = state.mode === 'ascii' ? '' : 'none';
-      if (S) { S.glyphs = getActiveChars(); spriteAtlasReset(); }
-      toast('Mode: ' + state.mode);
-    }
-    else if (e.key === 's' || e.key === 'S') exportPNG();
-    else if (e.key === '?') $('help').classList.add('show');
-    else if (e.key === 'Escape') $('help').classList.remove('show');
-    else if (e.key >= '1' && e.key <= '9') {
-      const idx = parseInt(e.key) - 1;
-      if (PRESETS[idx]) applyPreset(PRESETS[idx].name);
-    }
-  });
-}
-
-/* ============================================================
-   Pointer & drag/drop
-   ============================================================ */
-function bindPointer() {
-  canvas.addEventListener('pointermove', e => {
-    if (!S) return;
-    const rect = canvas.getBoundingClientRect();
-    ptr.x = ((e.clientX - rect.left) / rect.width) * S.C;
-    ptr.y = ((e.clientY - rect.top) / rect.height) * S.R;
-    ptr.on = true;
-  });
-  canvas.addEventListener('pointerdown', e => {
-    if (!S) return;
-    ptr.on = true;
-    ptr.b = 1;
-    const rect = canvas.getBoundingClientRect();
-    ptr.x = ((e.clientX - rect.left) / rect.width) * S.C;
-    ptr.y = ((e.clientY - rect.top) / rect.height) * S.R;
-  });
-  canvas.addEventListener('pointerleave', () => { ptr.on = false; });
-  canvas.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') ptr.on = false; });
-
-  setInterval(() => {
-    ptr.a += ((ptr.on ? 1 : 0) - ptr.a) * 0.2;
-    ptr.b *= 0.94;
-  }, 50);
-
-  const dz = $('dropzone');
-  ['dragenter', 'dragover'].forEach(ev => addEventListener(ev, e => {
-    e.preventDefault(); dz.classList.add('show');
-  }));
-  ['dragleave', 'drop'].forEach(ev => addEventListener(ev, e => {
-    e.preventDefault(); dz.classList.remove('show');
-  }));
-  addEventListener('drop', e => loadImageFiles(e.dataTransfer.files));
-
-  addEventListener('paste', e => {
-    for (const item of e.clipboardData.items) {
-      if (item.type.startsWith('image/')) loadImageFile(item.getAsFile());
-    }
-  });
-}
-
-/* ============================================================
-   Demo image
-   ============================================================ */
-function makeDemoImage() {
-  const c = document.createElement('canvas');
-  c.width = c.height = 900;
-  const g = c.getContext('2d');
-  g.fillStyle = '#000';
-  g.fillRect(0, 0, 900, 900);
-  const grad = g.createRadialGradient(450, 450, 20, 450, 450, 340);
-  grad.addColorStop(0, '#0a0a10');
-  grad.addColorStop(0.18, '#0d3b4c');
-  grad.addColorStop(0.45, '#1f7a8c');
-  grad.addColorStop(0.7, '#e09f3e');
-  grad.addColorStop(0.88, '#7a444a');
-  grad.addColorStop(1, '#000');
-  g.fillStyle = grad;
-  g.beginPath(); g.arc(450, 450, 340, 0, 7); g.fill();
-  g.strokeStyle = '#ffffff55';
-  g.lineWidth = 2;
-  for (let i = 0; i < 120; i++) {
-    const a = i / 120 * 6.283;
-    g.beginPath();
-    g.moveTo(450 + Math.cos(a) * 90, 450 + Math.sin(a) * 90);
-    g.lineTo(450 + Math.cos(a + 0.15) * 300, 450 + Math.sin(a + 0.15) * 300);
-    g.stroke();
-  }
-  g.fillStyle = '#000';
-  g.beginPath(); g.arc(450, 450, 90, 0, 7); g.fill();
-  g.fillStyle = '#fff';
-  g.beginPath(); g.arc(390, 390, 32, 0, 7); g.fill();
-  g.beginPath(); g.arc(505, 510, 14, 0, 7); g.fill();
-  const im = new Image();
-  im.onload = () => setImage(im);
-  im.src = c.toDataURL();
-  return im;
-}
-
-/* ============================================================
-   Bootstrap
-   ============================================================ */
-function init() {
+/* -------- boot -------- */
+function init(){
   initUI();
-  bindPointer();
-  bindKeyboard();
-  syncUI();
-  makeDemoImage();
+  initConfetti();
+  makeCake();
   requestAnimationFrame(frame);
-
-  setInterval(() => {
-    if (playlist.length > 1 && !paused && !live && now() - slideTimer > 8000) {
-      showPlaylist(pi + 1);
-    }
-  }, 500);
-
-  setTimeout(() => toast('Press H for controls · ? for help', 2600), 500);
 }
 
 window.addEventListener('load', init);
