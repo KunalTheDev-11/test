@@ -231,7 +231,7 @@ section>h3{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var
     <div class="row-k"><kbd>R</kbd> replay</div>
     <div class="row-k"><kbd>F</kbd> fullscreen</div>
     <div class="row-k"><kbd>H</kbd> toggle panel</div>
-    <div class="row-k"><kbd>1</kbd>–<kbd>7</kbd> quick preset switch</div>
+    <div class="row-k"><kbd>1</kbd>–<kbd>9</kbd> quick preset switch</div>
     <div class="row-k"><kbd>M</kbd> cycle color mode</div>
     <div class="row-k"><kbd>V</kbd> cycle render mode</div>
     <div class="row-k"><kbd>S</kbd> save PNG</div>
@@ -241,7 +241,7 @@ section>h3{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var
     <p>· Drag any image onto the window, or paste from clipboard.</p>
     <p>· Drag the pointer over the canvas — it pushes particles and adds a light.</p>
     <p>· Lower the resolution for a chunkier look; raise it for more detail.</p>
-    <p>· Auto-quality will reduce resolution if FPS drops below ~19.</p>
+    <p>· Auto-quality adapts resolution to keep the frame rate smooth.</p>
     <p>· Braille mode packs 2×4 dots per cell — best with small resolutions.</p>
     <p>· Quadrant blocks are great with a palette color mode.</p>
     <p style="margin-top:20px;text-align:center">
@@ -258,7 +258,7 @@ section>h3{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var
 <script>
 'use strict';
 /* ============================================================
-   0. Utilities
+   Utilities
    ============================================================ */
 const $ = id => document.getElementById(id);
 const clamp = (x, a, b) => x < a ? a : x > b ? b : x;
@@ -268,25 +268,24 @@ const rand = (a, b) => a + Math.random() * (b - a);
 const now = () => performance.now();
 const DPR = () => window.devicePixelRatio || 1;
 const hex2rgb = h => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
-const rgb2hex = (r, g, b) => '#' + [r, g, b].map(v => clamp(Math.round(v), 0, 255).toString(16).padStart(2, '0')).join('');
 function toast(msg, ms = 1600) {
   const t = $('toast'); t.textContent = msg; t.classList.add('show');
   clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), ms);
 }
 
 /* ============================================================
-   1. Constants
+   Constants
    ============================================================ */
-const CA = 0.5;                              // cell aspect ratio (width / height)
-const BAYER8 = (() => {                      // 8×8 Bayer matrix, 0..63
+const CA = 0.5;
+const BAYER8 = (() => {
   const m = new Uint8Array(64);
-  const bayer = [
+  const b = [
     [0,32,8,40,2,34,10,42],[48,16,56,24,50,18,58,26],
     [12,44,4,36,14,46,6,38],[60,28,52,20,62,30,54,22],
     [3,35,11,43,1,33,9,41],[51,19,59,27,49,17,57,25],
     [15,47,7,39,13,45,5,37],[63,31,55,23,61,29,53,21]
   ];
-  for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) m[y*8+x] = bayer[y][x];
+  for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) m[y*8+x] = b[y][x];
   return m;
 })();
 
@@ -307,36 +306,35 @@ const CHARSETS = {
 const DEFAULT_CHARSET = 'classic';
 
 const PALETTES = {
-  neon:     ['#0a0014','#ff2d95'],
-  amber:    ['#100000','#ffb000'],
-  matrix:   ['#000000','#00ff41'],
-  ice:      ['#000508','#8fe6ff'],
-  fire:     ['#180000','#ff4d00'],
-  mono:     ['#000000','#ffffff'],
-  dusk:     ['#08011a','#7b5cff'],
-  mint:     ['#001a12','#3dffb0'],
+  neon:  ['#0a0014','#ff2d95'],
+  amber: ['#100000','#ffb000'],
+  matrix:['#000000','#00ff41'],
+  ice:   ['#000508','#8fe6ff'],
+  fire:  ['#180000','#ff4d00'],
+  mono:  ['#000000','#ffffff'],
+  dusk:  ['#08011a','#7b5cff'],
+  mint:  ['#001a12','#3dffb0'],
 };
 
-/* Presets — each preset is a partial state object */
 const PRESETS = [
-  { name:'Classic',      s:{ mode:'ascii', charset:'classic', color:'chroma', res:220, bright:1, contrast:1, gamma:1, glow:0.8, bloom:0, scan:0, vig:0, zoom:0.4, breath:0.4, wave:0.3, speed:1, ptype:'dust', edges:true } },
-  { name:'Terminal',     s:{ mode:'ascii', charset:'dense', color:'palette', pal:'matrix', res:280, bright:1.1, contrast:1.2, gamma:0.9, glow:1.2, bloom:6, scan:35, vig:40, zoom:0, breath:0.2, wave:0.5, speed:1, ptype:'sparkle', edges:true } },
-  { name:'Neon',         s:{ mode:'ascii', charset:'minimal', color:'palette', pal:'neon', res:200, bright:1.05, contrast:1.15, gamma:1, glow:1.4, bloom:14, scan:0, vig:30, zoom:0.3, breath:0.5, wave:0.4, speed:1.2, ptype:'embers', edges:true } },
-  { name:'Braille',      s:{ mode:'braille', charset:'classic', color:'mono', res:140, bright:1.3, contrast:1.4, gamma:0.85, glow:0.6, bloom:2, scan:0, vig:0, zoom:0.2, breath:0.3, wave:0.2, speed:1, ptype:'none', edges:false } },
-  { name:'Quad',         s:{ mode:'quadrant', charset:'classic', color:'chroma', res:180, bright:1, contrast:1.1, gamma:1, glow:0.9, bloom:4, scan:0, vig:0, zoom:0.2, breath:0.2, wave:0.3, speed:1, ptype:'dust', edges:false } },
-  { name:'Dither',       s:{ mode:'dither', charset:'classic', color:'mono', res:240, bright:1.1, contrast:1.3, gamma:0.9, glow:0.4, bloom:0, scan:0, vig:0, zoom:0, breath:0, wave:0, speed:1, ptype:'none', edges:false } },
-  { name:'Amber CRT',    s:{ mode:'ascii', charset:'classic', color:'palette', pal:'amber', res:240, bright:1.05, contrast:1.2, gamma:0.95, glow:1.3, bloom:8, scan:55, vig:55, zoom:0.3, breath:0.3, wave:0.3, speed:1, ptype:'embers', edges:true } },
-  { name:'Fire',         s:{ mode:'ascii', charset:'blocks', color:'palette', pal:'fire', res:220, bright:1.1, contrast:1.2, gamma:0.9, glow:1.4, bloom:12, scan:0, vig:20, zoom:0.4, breath:0.6, wave:0.6, speed:1.4, ptype:'embers', edges:false } },
-  { name:'Ice',          s:{ mode:'ascii', charset:'minimal', color:'palette', pal:'ice', res:260, bright:1.05, contrast:1.1, gamma:1, glow:1.1, bloom:6, scan:0, vig:25, zoom:0.3, breath:0.3, wave:0.3, speed:0.8, ptype:'snow', edges:true } },
-  { name:'Stars',        s:{ mode:'ascii', charset:'stars', color:'mono', res:200, bright:1.2, contrast:1.3, gamma:0.9, glow:1.3, bloom:10, scan:0, vig:30, zoom:0.4, breath:0.4, wave:0.4, speed:1, ptype:'stars', edges:true } },
-  { name:'Runes',        s:{ mode:'ascii', charset:'runes', color:'palette', pal:'dusk', res:180, bright:1.1, contrast:1.15, gamma:0.95, glow:1, bloom:4, scan:0, vig:0, zoom:0.4, breath:0.4, wave:0.4, speed:1, ptype:'dust', edges:true } },
-  { name:'Mono',         s:{ mode:'ascii', charset:'minimal', color:'mono', res:200, bright:1, contrast:1.2, gamma:0.95, glow:1, bloom:3, scan:0, vig:0, zoom:0.2, breath:0.2, wave:0.2, speed:1, ptype:'none', edges:true } },
-  { name:'Dense',        s:{ mode:'ascii', charset:'dense', color:'chroma', res:320, bright:1, contrast:1, gamma:1, glow:0.6, bloom:0, scan:0, vig:0, zoom:0.3, breath:0.3, wave:0.3, speed:1, ptype:'none', edges:false } },
-  { name:'Rain',         s:{ mode:'ascii', charset:'binary', color:'palette', pal:'matrix', res:220, bright:1.1, contrast:1.2, gamma:0.9, glow:1.2, bloom:5, scan:20, vig:20, zoom:0.2, breath:0.3, wave:0.4, speed:1, ptype:'rain', edges:false } },
+  { name:'Classic',   s:{ mode:'ascii',    charset:'classic', color:'chroma',  res:220, bright:1,    contrast:1,   gamma:1,    glow:0.8, bloom:0,  scan:0,  vig:0,  zoom:0.4, breath:0.4, wave:0.3, speed:1,   ptype:'dust',    edges:true  } },
+  { name:'Terminal',  s:{ mode:'ascii',    charset:'dense',   color:'palette', res:280, bright:1.1,  contrast:1.2, gamma:0.9,  glow:1.2, bloom:6,  scan:35, vig:40, zoom:0,   breath:0.2, wave:0.5, speed:1,   ptype:'sparkle', edges:true,  pal:'matrix' } },
+  { name:'Neon',      s:{ mode:'ascii',    charset:'minimal', color:'palette', res:200, bright:1.05, contrast:1.15,gamma:1,    glow:1.4, bloom:14, scan:0,  vig:30, zoom:0.3, breath:0.5, wave:0.4, speed:1.2, ptype:'embers',  edges:true,  pal:'neon'   } },
+  { name:'Braille',   s:{ mode:'braille',  charset:'classic', color:'mono',    res:140, bright:1.3,  contrast:1.4, gamma:0.85, glow:0.6, bloom:2,  scan:0,  vig:0,  zoom:0.2, breath:0.3, wave:0.2, speed:1,   ptype:'none',    edges:false } },
+  { name:'Quad',      s:{ mode:'quadrant', charset:'classic', color:'chroma',  res:180, bright:1,    contrast:1.1, gamma:1,    glow:0.9, bloom:4,  scan:0,  vig:0,  zoom:0.2, breath:0.2, wave:0.3, speed:1,   ptype:'dust',    edges:false } },
+  { name:'Dither',    s:{ mode:'dither',   charset:'classic', color:'mono',    res:240, bright:1.1,  contrast:1.3, gamma:0.9,  glow:0.4, bloom:0,  scan:0,  vig:0,  zoom:0,   breath:0,   wave:0,   speed:1,   ptype:'none',    edges:false } },
+  { name:'Amber CRT', s:{ mode:'ascii',    charset:'classic', color:'palette', res:240, bright:1.05, contrast:1.2, gamma:0.95, glow:1.3, bloom:8,  scan:55, vig:55, zoom:0.3, breath:0.3, wave:0.3, speed:1,   ptype:'embers',  edges:true,  pal:'amber'  } },
+  { name:'Fire',      s:{ mode:'ascii',    charset:'blocks',  color:'palette', res:220, bright:1.1,  contrast:1.2, gamma:0.9,  glow:1.4, bloom:12, scan:0,  vig:20, zoom:0.4, breath:0.6, wave:0.6, speed:1.4, ptype:'embers',  edges:false, pal:'fire'   } },
+  { name:'Ice',       s:{ mode:'ascii',    charset:'minimal', color:'palette', res:260, bright:1.05, contrast:1.1, gamma:1,    glow:1.1, bloom:6,  scan:0,  vig:25, zoom:0.3, breath:0.3, wave:0.3, speed:0.8, ptype:'snow',    edges:true,  pal:'ice'    } },
+  { name:'Stars',     s:{ mode:'ascii',    charset:'stars',   color:'mono',    res:200, bright:1.2,  contrast:1.3, gamma:0.9,  glow:1.3, bloom:10, scan:0,  vig:30, zoom:0.4, breath:0.4, wave:0.4, speed:1,   ptype:'stars',   edges:true  } },
+  { name:'Runes',     s:{ mode:'ascii',    charset:'runes',   color:'palette', res:180, bright:1.1,  contrast:1.15,gamma:0.95, glow:1,   bloom:4,  scan:0,  vig:0,  zoom:0.4, breath:0.4, wave:0.4, speed:1,   ptype:'dust',    edges:true,  pal:'dusk'   } },
+  { name:'Mono',      s:{ mode:'ascii',    charset:'minimal', color:'mono',    res:200, bright:1,    contrast:1.2, gamma:0.95, glow:1,   bloom:3,  scan:0,  vig:0,  zoom:0.2, breath:0.2, wave:0.2, speed:1,   ptype:'none',    edges:true  } },
+  { name:'Dense',     s:{ mode:'ascii',    charset:'dense',   color:'chroma',  res:320, bright:1,    contrast:1,   gamma:1,    glow:0.6, bloom:0,  scan:0,  vig:0,  zoom:0.3, breath:0.3, wave:0.3, speed:1,   ptype:'none',    edges:false } },
+  { name:'Rain',      s:{ mode:'ascii',    charset:'binary',  color:'palette', res:220, bright:1.1,  contrast:1.2, gamma:0.9,  glow:1.2, bloom:5,  scan:20, vig:20, zoom:0.2, breath:0.3, wave:0.4, speed:1,   ptype:'rain',    edges:false, pal:'matrix' } },
 ];
 
 /* ============================================================
-   2. State
+   State
    ============================================================ */
 const state = {
   mode: 'ascii',
@@ -368,22 +366,22 @@ const canvas = $('cv');
 const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
 const fxCanvas = $('fx');
 const fxCtx = fxCanvas.getContext('2d');
-let S = null;                     // per-scene data
-let src = null;                   // current source element (Image or Video)
-let live = false;                 // source is a video/camera
-let vid = null;                   // active <video>
+let S = null;
+let src = null;
+let live = false;
+let vid = null;
 let mirror = false;
 let paused = false, pauseAt = 0, t0 = now(), lastFrame = now(), lastDraw = 0;
 let emaFps = 60, frameCount = 0, lastAdapt = 0;
 let playlist = [], pi = 0, slideTimer = 0;
 let recorder = null, recordTimer = 0;
-let dragging = false;
+let recComp = null, recCompCtx = null, recRafHandle = null;
+let liveCanvas = null, liveCtx = null;
 
-/* Pointer */
 const ptr = { x: -9, y: -9, on: false, a: 0, b: 0 };
 
 /* ============================================================
-   3. Char / glyph helpers
+   Char / glyph helpers
    ============================================================ */
 function getActiveChars() {
   if (state.mode === 'braille') {
@@ -401,7 +399,7 @@ function getActiveChars() {
 }
 
 /* ============================================================
-   4. Sprite atlas (glyph + color cache)
+   Sprite atlas
    ============================================================ */
 const MAX_SPRITES = 8192;
 const SPRITE_COLS = 64;
@@ -445,7 +443,7 @@ function sprite(g, key) {
 }
 
 /* ============================================================
-   5. Image processing — build scene from source
+   Image processing
    ============================================================ */
 function percentile(arr, p) {
   const s = Float32Array.from(arr).sort();
@@ -461,7 +459,6 @@ function build() {
   const N = C * R;
   const HC = C * 2, HR = R * 4, HN = HC * HR;
 
-  // ---- Downscale source into an offscreen buffer ----
   const off = document.createElement('canvas');
   off.width = HC; off.height = HR;
   const oc = off.getContext('2d', { willReadFrequently: true });
@@ -471,7 +468,6 @@ function build() {
   oc.drawImage(src, 0, 0, HC, HR);
   const data = oc.getImageData(0, 0, HC, HR).data;
 
-  // ---- Hi-res RGB + luminance ----
   const hiRGB = new Float32Array(HN * 3);
   const hiLum = new Float32Array(HN);
   for (let i = 0; i < HN; i++) {
@@ -480,7 +476,6 @@ function build() {
     hiLum[i] = 0.299 * r + 0.587 * g + 0.114 * b;
   }
 
-  // ---- Cell-level RGB + luminance ----
   const rgb = new Float32Array(N * 3);
   const lum = new Float32Array(N);
   for (let cy = 0; cy < R; cy++) {
@@ -496,7 +491,6 @@ function build() {
     }
   }
 
-  // ---- Levels ----
   const lo = percentile(lum, 3);
   const hi = percentile(lum, 99.5);
   const span = Math.max(hi - lo, 1e-3);
@@ -505,7 +499,6 @@ function build() {
   const hiLumNorm = new Float32Array(HN);
   for (let i = 0; i < HN; i++) hiLumNorm[i] = clamp((hiLum[i] - lo) / span, 0, 1);
 
-  // ---- Edges (Sobel-lite) ----
   const Ls = blurBuffer(L, C, R, 0.9 / CA, 0.9);
   const E = new Float32Array(N);
   for (let y = 0; y < R; y++) for (let x = 0; x < C; x++) {
@@ -515,7 +508,6 @@ function build() {
     E[n] = Math.min(1.5, Math.hypot(gx, gy) / CA);
   }
 
-  // ---- Chroma ----
   const ch = [new Float32Array(N), new Float32Array(N), new Float32Array(N)];
   for (let i = 0; i < N; i++) {
     const m = Math.max(rgb[i * 3], rgb[i * 3 + 1], rgb[i * 3 + 2]) + 1e-4;
@@ -524,15 +516,12 @@ function build() {
     ch[2][i] = rgb[i * 3 + 2] / m;
   }
 
-  // ---- Glow blur ----
   const B = blurBuffer(L, C, R, 2.2, 2.2);
 
-  // ---- Buffer allocation ----
-  const NCELLS = N;
-  const gi = new Uint16Array(NCELLS);
-  const key = new Uint16Array(NCELLS);
-  const pg = new Uint16Array(NCELLS).fill(65535);
-  const pk = new Uint16Array(NCELLS).fill(65535);
+  const gi = new Uint16Array(N);
+  const key = new Uint16Array(N);
+  const pg = new Uint16Array(N).fill(65535);
+  const pk = new Uint16Array(N).fill(65535);
 
   S = {
     C, R, N, HC, HR, HN,
@@ -543,7 +532,6 @@ function build() {
     ns: 0,
     cw: 8, chh: 16,
     atlas: null, actx: null,
-    fx: $('fx'), fxCtx,
     particles: null,
     dirty: true,
   };
@@ -554,7 +542,6 @@ function build() {
   updateHUD();
 }
 
-/* Box blur (separable, 3 passes = gaussian-like) */
 function blurBuffer(srcArr, W, H, sigmaX, sigmaY) {
   const out = Float32Array.from(srcArr);
   const tmp = new Float32Array(out.length);
@@ -567,9 +554,7 @@ function blurBuffer(srcArr, W, H, sigmaX, sigmaY) {
     for (let l = 0; l < M; l++) {
       const base = l * lineStride;
       let sum = input[base] * (radius + 1);
-      for (let i = 1; i <= radius; i++) {
-        sum += input[base + Math.min(i, N - 1) * stride];
-      }
+      for (let i = 1; i <= radius; i++) sum += input[base + Math.min(i, N - 1) * stride];
       for (let i = 0; i < N; i++) {
         output[base + i * stride] = sum * inv;
         sum += input[base + Math.min(N - 1, i + radius + 1) * stride];
@@ -577,16 +562,14 @@ function blurBuffer(srcArr, W, H, sigmaX, sigmaY) {
       }
     }
   };
-  let sigma = sigmaX;
   let srcBuf = out, dstBuf = tmp;
   for (let k = 0; k < 3; k++) {
-    const r = Math.max(1, Math.round((Math.sqrt(4 * sigma * sigma + 1) - 1) / 2));
+    const r = Math.max(1, Math.round((Math.sqrt(4 * sigmaX * sigmaX + 1) - 1) / 2));
     pass(srcBuf, dstBuf, r, true);
     const t = srcBuf; srcBuf = dstBuf; dstBuf = t;
   }
-  sigma = sigmaY;
   for (let k = 0; k < 3; k++) {
-    const r = Math.max(1, Math.round((Math.sqrt(4 * sigma * sigma + 1) - 1) / 2));
+    const r = Math.max(1, Math.round((Math.sqrt(4 * sigmaY * sigmaY + 1) - 1) / 2));
     pass(srcBuf, dstBuf, r, false);
     const t = srcBuf; srcBuf = dstBuf; dstBuf = t;
   }
@@ -594,7 +577,7 @@ function blurBuffer(srcArr, W, H, sigmaX, sigmaY) {
 }
 
 /* ============================================================
-   6. Layout — fit canvas + sprite atlas to viewport
+   Layout
    ============================================================ */
 function layout() {
   if (!S) return;
@@ -608,7 +591,6 @@ function layout() {
   const chh = Math.max(4, Math.round(cw / CA));
   S.cw = cw; S.chh = chh;
 
-  // Sprite atlas
   if (!S.atlas) {
     S.atlas = document.createElement('canvas');
     S.actx = S.atlas.getContext('2d');
@@ -621,7 +603,6 @@ function layout() {
   a.textBaseline = 'middle';
   spriteAtlasReset();
 
-  // Main canvas
   canvas.width = S.C * cw;
   canvas.height = S.R * chh;
   const fit = Math.min(1, availW * d / (S.C * cw), availH * d / (S.R * chh));
@@ -629,7 +610,6 @@ function layout() {
   canvas.style.height = S.R * chh * fit / d + 'px';
   ctx.imageSmoothingEnabled = false;
 
-  // FX canvas mirrors the main
   fxCanvas.width = canvas.width;
   fxCanvas.height = canvas.height;
   fxCanvas.style.width = canvas.style.width;
@@ -640,53 +620,54 @@ function layout() {
 }
 
 /* ============================================================
-   7. Filters — applied per cell
+   Filters
    ============================================================ */
 function applyFilters(l) {
-  let v = l;
-  v = (v - 0.5) * state.contrast + 0.5;
-  v = clamp(v, 0, 1);
-  v *= state.bright;
+  let v = (l - 0.5) * state.contrast + 0.5;
+  v = clamp(v, 0, 1) * state.bright;
   v = clamp(v, 0, 1);
   if (state.gamma !== 1) v = Math.pow(v, state.gamma);
   return v;
 }
 
 /* ============================================================
-   8. Per-frame compute — pick glyph + color per cell
+   Per-frame compute
    ============================================================ */
 function compute(t, dt) {
-  const { C, R, N, L, E, ch, B, gi, key, hiLumNorm, HC } = S;
+  const { C, R, L, E, ch, B, gi, key, hiLumNorm, HC } = S;
   const glyphs = S.glyphs;
   const nG = glyphs.length;
   const mode = state.mode;
   const colorMode = state.color;
 
-  // Zoom + breath
-  const zx = 1 + state.zoom * 0.05 * smooth(t / 12) + state.breath * 0.05 * Math.sin(t * 1.7);
+  // Zoom (visible now: 0..40% range at slider 0..100)
+  const zx = 1 + state.zoom * 0.4 * smooth(t / 12);
   const zy = zx;
   const cx = (C - 1) / 2, cy = (R - 1) / 2;
   const sx = new Int32Array(C), sy = new Int32Array(R);
   for (let c = 0; c < C; c++) sx[c] = clamp(Math.round((c - cx) / zx + cx), 0, C - 1);
   for (let r = 0; r < R; r++) sy[r] = clamp(Math.round((r - cy) / zy + cy), 0, R - 1);
 
-  const breath = 1 + state.breath * 0.05 * Math.sin(t * 1.7);
-  const waveAmp = state.wave * 0.15;
+  // Breath (visible now: 0..15% brightness swing)
+  const breath = 1 + state.breath * 0.15 * Math.sin(t * 1.7);
+
+  // Wave: horizontal displacement per row, animates over time
+  const waveMag = state.wave * 8;
+
   const pal = PALETTES[state.pal] ? [hex2rgb(PALETTES[state.pal][0]), hex2rgb(PALETTES[state.pal][1])] : null;
+  const edgeGlyph = Math.max(1, Math.floor(nG * 0.55));
 
   for (let r = 0; r < R; r++) {
-    const rowSin = Math.sin(r * 0.23 - t * 1.1) * waveAmp;
+    const waveOff = Math.sin(r * 0.3 + t * 1.5) * waveMag;
+    const rowBase = sy[r] * C;
     for (let c = 0; c < C; c++) {
       const n = r * C + c;
-      const j = sy[r] * C + sx[c];
+      const cShift = clamp(Math.round(c + waveOff), 0, C - 1);
+      const j = rowBase + sx[cShift];
 
-      // 1) base luminance through filters
       let Lf = applyFilters(L[j]) * breath;
-
-      // 2) glow lift
       Lf += B[j] * state.glow * 0.4;
 
-      // 3) pointer light
       if (ptr.a > 0.02) {
         const dx = (c - ptr.x) * CA, dy = r - ptr.y;
         const d2 = dx * dx + dy * dy;
@@ -695,10 +676,16 @@ function compute(t, dt) {
 
       Lf = clamp(Lf, 0, 1);
 
-      // 4) glyph selection
       let g = 0;
+      let isEdge = false;
+
       if (mode === 'ascii') {
         g = Math.min(nG - 1, (Lf * nG) | 0);
+        if (state.edges && E[j] > 0.55 && Lf > 0.2) {
+          g = edgeGlyph;
+          Lf = Math.min(1, Lf * 1.35);
+          isEdge = true;
+        }
       } else if (mode === 'dither') {
         const bayer = BAYER8[(r & 7) * 8 + (c & 7)] / 64;
         g = Lf > bayer ? 1 : 0;
@@ -717,22 +704,13 @@ function compute(t, dt) {
           for (let rr = r0; rr <= r1; rr++) s += hiLumNorm[(r * 4 + rr) * HC + (c * 2 + ci)];
           return s / (r1 - r0 + 1);
         };
-        const qUL = qAvg(0, 0, 1), qUR = qAvg(1, 0, 1);
-        const qLL = qAvg(0, 2, 3), qLR = qAvg(1, 2, 3);
-        if (qUL > 0.5) bits |= 1;
-        if (qUR > 0.5) bits |= 2;
-        if (qLL > 0.5) bits |= 4;
-        if (qLR > 0.5) bits |= 8;
+        if (qAvg(0, 0, 1) > 0.5) bits |= 1;
+        if (qAvg(1, 0, 1) > 0.5) bits |= 2;
+        if (qAvg(0, 2, 3) > 0.5) bits |= 4;
+        if (qAvg(1, 2, 3) > 0.5) bits |= 8;
         g = bits;
       }
 
-      // 5) edge override (ASCII only)
-      if (state.edges && mode === 'ascii' && E[j] > 0.55 && Lf > 0.2) {
-        // pick a dark-ish char so it reads as an outline
-        g = 1;
-      }
-
-      // 6) color
       let r0, g0, b0;
       if (colorMode === 'mono') {
         const v = clamp(Lf * 2, 0, 1) * 255;
@@ -742,9 +720,10 @@ function compute(t, dt) {
         g0 = S.rgb[j * 3 + 1] * 255;
         b0 = S.rgb[j * 3 + 2] * 255;
       } else if (colorMode === 'chroma') {
-        r0 = ch[0][j] * 255 * (0.3 + 0.7 * Lf);
-        g0 = ch[1][j] * 255 * (0.3 + 0.7 * Lf);
-        b0 = ch[2][j] * 255 * (0.3 + 0.7 * Lf);
+        const boost = isEdge ? 1.25 : 1;
+        r0 = Math.min(255, ch[0][j] * 255 * (0.3 + 0.7 * Lf) * boost);
+        g0 = Math.min(255, ch[1][j] * 255 * (0.3 + 0.7 * Lf) * boost);
+        b0 = Math.min(255, ch[2][j] * 255 * (0.3 + 0.7 * Lf) * boost);
       } else if (colorMode === 'palette' && pal) {
         r0 = lerp(pal[0][0], pal[1][0], Lf);
         g0 = lerp(pal[0][1], pal[1][1], Lf);
@@ -754,7 +733,6 @@ function compute(t, dt) {
         r0 = g0 = b0 = v;
       }
 
-      // 7) quantize to 4-bit per channel
       const qr = Math.min(15, Math.max(0, Math.round(r0 / 17)));
       const qg = Math.min(15, Math.max(0, Math.round(g0 / 17)));
       const qb = Math.min(15, Math.max(0, Math.round(b0 / 17)));
@@ -766,7 +744,7 @@ function compute(t, dt) {
 }
 
 /* ============================================================
-   9. Render — draw sprites, then post effects
+   Render
    ============================================================ */
 function render() {
   const { C, R, cw, chh, gi, key, pg, pk, atlas } = S;
@@ -788,9 +766,6 @@ function render() {
   applyPostFX();
 }
 
-/* ============================================================
-   10. Post effects
-   ============================================================ */
 function applyPostFX() {
   const w = canvas.width, h = canvas.height;
   fxCtx.clearRect(0, 0, w, h);
@@ -817,7 +792,7 @@ function applyPostFX() {
 }
 
 /* ============================================================
-   11. Particles
+   Particles — run AFTER compute so they overlay the image
    ============================================================ */
 function rebuildParticles() {
   if (!S) return;
@@ -827,22 +802,19 @@ function rebuildParticles() {
   const pp = {
     x: new Float32Array(count), y: new Float32Array(count),
     vx: new Float32Array(count), vy: new Float32Array(count),
-    ph: new Float32Array(count), lf: new Float32Array(count),
-    type: new Uint8Array(count),
+    ph: new Float32Array(count),
   };
   for (let i = 0; i < count; i++) {
     pp.x[i] = Math.random() * C;
     pp.y[i] = Math.random() * R;
     pp.ph[i] = Math.random() * Math.PI * 2;
-    pp.lf[i] = Math.random();
-    pp.type[i] = (Math.random() * 3) | 0;
     switch (state.ptype) {
       case 'embers': pp.vy[i] = -(1.5 + Math.random() * 3); pp.vx[i] = rand(-0.3, 0.3); break;
-      case 'snow': pp.vy[i] = 0.3 + Math.random() * 1.0; pp.vx[i] = rand(-0.4, 0.4); break;
-      case 'rain': pp.vy[i] = 4 + Math.random() * 6; pp.vx[i] = -0.5; break;
-      case 'stars': pp.vy[i] = 0; pp.vx[i] = 0; break;
-      case 'dust': pp.vy[i] = -(0.2 + Math.random() * 0.6); pp.vx[i] = rand(-0.2, 0.2); break;
-      case 'sparkle': pp.vy[i] = rand(-0.5, 0.5); pp.vx[i] = rand(-0.5, 0.5); break;
+      case 'snow':   pp.vy[i] = 0.3 + Math.random() * 1.0;  pp.vx[i] = rand(-0.4, 0.4); break;
+      case 'rain':   pp.vy[i] = 4 + Math.random() * 6;      pp.vx[i] = -0.5;            break;
+      case 'stars':  pp.vy[i] = 0;                          pp.vx[i] = 0;               break;
+      case 'dust':   pp.vy[i] = -(0.2 + Math.random() * 0.6); pp.vx[i] = rand(-0.2, 0.2); break;
+      case 'sparkle':pp.vy[i] = rand(-0.5, 0.5);            pp.vx[i] = rand(-0.5, 0.5); break;
     }
   }
   S.particles = pp;
@@ -851,10 +823,15 @@ function rebuildParticles() {
 function updateParticles(t, dt) {
   if (!S || !S.particles || state.ptype === 'none') return;
   const pp = S.particles;
-  const { C, R } = S;
+  const { C, R, gi, key, glyphs } = S;
   const count = pp.x.length;
+  const nG = glyphs.length;
+  if (!nG) return;
+  // Pick a bright glyph for particles (75% up the charset)
+  const pGlyphIdx = Math.floor(nG * 0.85);
+  const pGlyph = glyphs[pGlyphIdx] || glyphs[nG - 1] || '.';
+
   for (let i = 0; i < count; i++) {
-    // pointer push
     if (ptr.a > 0.02) {
       const dx = (pp.x[i] - ptr.x) * CA, dy = pp.y[i] - ptr.y;
       const d2 = dx * dx + dy * dy;
@@ -866,72 +843,73 @@ function updateParticles(t, dt) {
         pp.y[i] += (dy / d) * fp;
       }
     }
-    // wave motion
     if (state.ptype === 'snow' || state.ptype === 'dust' || state.ptype === 'sparkle') {
       pp.x[i] += Math.sin(t * 0.8 + pp.ph[i]) * 0.6 * dt;
     }
-    // move
     pp.x[i] += pp.vx[i] * dt;
     pp.y[i] += pp.vy[i] * dt;
-    // wrap
     if (pp.y[i] < 0) { pp.y[i] = R - 1; pp.x[i] = Math.random() * C; }
     if (pp.y[i] >= R) { pp.y[i] = 0; pp.x[i] = Math.random() * C; }
     if (pp.x[i] < 0) pp.x[i] = C - 1;
     if (pp.x[i] >= C) pp.x[i] = 0;
-  }
-  // draw particles into the sprite cache (as overlay cells)
-  for (let i = 0; i < count; i++) {
+
     const x = pp.x[i] | 0, y = pp.y[i] | 0;
     if (x < 0 || x >= C || y < 0 || y >= R) continue;
     const n = y * C + x;
-    if (S.gi[n] >= 2) continue;
+    // Only paint over dark cells (glyph index 0 or 1)
+    if (gi[n] >= 2) continue;
+
     let lf = 0.4;
-    let col = null;
-    if (state.ptype === 'embers') { lf = 0.6 + 0.4 * (0.5 + 0.5 * Math.sin(t * 3 + pp.ph[i] * 3)); col = [255, 150, 40]; }
-    else if (state.ptype === 'stars') { lf = 0.5 + 0.5 * Math.sin(t * 2 + pp.ph[i] * 5); col = [255, 255, 255]; }
-    else if (state.ptype === 'snow') { lf = 0.7; col = [220, 240, 255]; }
-    else if (state.ptype === 'rain') { lf = 0.5; col = [140, 180, 255]; }
-    else if (state.ptype === 'sparkle') { lf = 0.5 + 0.5 * Math.sin(t * 6 + pp.ph[i] * 8); col = [255, 200, 240]; }
-    else if (state.ptype === 'dust') { lf = 0.3; col = [180, 180, 200]; }
+    let cr = 180, cg = 180, cb = 200;
+    if (state.ptype === 'embers') { lf = 0.6 + 0.4 * (0.5 + 0.5 * Math.sin(t * 3 + pp.ph[i] * 3)); cr = 255; cg = 150; cb = 40; }
+    else if (state.ptype === 'stars') { lf = 0.5 + 0.5 * Math.sin(t * 2 + pp.ph[i] * 5); cr = 255; cg = 255; cb = 255; }
+    else if (state.ptype === 'snow') { lf = 0.7; cr = 220; cg = 240; cb = 255; }
+    else if (state.ptype === 'rain') { lf = 0.5; cr = 140; cg = 180; cb = 255; }
+    else if (state.ptype === 'sparkle') { lf = 0.5 + 0.5 * Math.sin(t * 6 + pp.ph[i] * 8); cr = 255; cg = 200; cb = 240; }
+    else if (state.ptype === 'dust') { lf = 0.3; cr = 180; cg = 180; cb = 200; }
+
     const m = clamp(lf, 0, 1);
-    if (!col) col = [180, 180, 200];
-    const qr = Math.min(15, Math.round(col[0] / 17 * m));
-    const qg = Math.min(15, Math.round(col[1] / 17 * m));
-    const qb = Math.min(15, Math.round(col[2] / 17 * m));
-    // pick a bright glyph for particles
-    const gg = S.glyphs.length > 4 ? S.glyphs[Math.floor(S.glyphs.length * 0.85)] : S.glyphs[S.glyphs.length - 1] || '.';
-    const glyphIndex = S.glyphs.indexOf(gg);
-    if (glyphIndex < 0) continue;
-    S.gi[n] = glyphIndex;
-    S.key[n] = (qr << 8) | (qg << 4) | qb;
+    const qr = Math.min(15, Math.round(cr / 17 * m));
+    const qg = Math.min(15, Math.round(cg / 17 * m));
+    const qb = Math.min(15, Math.round(cb / 17 * m));
+
+    gi[n] = pGlyphIdx;
+    key[n] = (qr << 8) | (qg << 4) | qb;
   }
 }
 
 /* ============================================================
-   12. Live source updates (video / webcam)
+   Live source (video / webcam) — with cached canvas
    ============================================================ */
+function getLiveCanvas(w, h) {
+  if (!liveCanvas) {
+    liveCanvas = document.createElement('canvas');
+    liveCtx = liveCanvas.getContext('2d', { willReadFrequently: true });
+  }
+  if (liveCanvas.width !== w || liveCanvas.height !== h) {
+    liveCanvas.width = w;
+    liveCanvas.height = h;
+  }
+  return liveCtx;
+}
+
 function liveUpdate() {
   if (!S || !vid || vid.readyState < 2) return;
   const { C, R, L, B, ch, hiLumNorm, HC, hiRGB, rgb } = S;
   const H = R * 4;
 
-  // Draw video into hi-res buffer
-  const off = document.createElement('canvas');
-  off.width = HC; off.height = H;
-  const oc = off.getContext('2d', { willReadFrequently: true });
-  oc.setTransform(mirror ? -1 : 1, 0, 0, 1, mirror ? HC : 0, 0);
-  oc.drawImage(vid, 0, 0, HC, H);
-  const d = oc.getImageData(0, 0, HC, H).data;
+  const lctx = getLiveCanvas(HC, H);
+  lctx.setTransform(mirror ? -1 : 1, 0, 0, 1, mirror ? HC : 0, 0);
+  lctx.drawImage(vid, 0, 0, HC, H);
+  lctx.setTransform(1, 0, 0, 1, 0, 0);
+  const d = lctx.getImageData(0, 0, HC, H).data;
 
-  // Update hi-res luminance and norm
   for (let i = 0; i < HC * H; i++) {
     const r = d[i * 4] / 255, g = d[i * 4 + 1] / 255, b = d[i * 4 + 2] / 255;
     hiRGB[i * 3] = r; hiRGB[i * 3 + 1] = g; hiRGB[i * 3 + 2] = b;
-    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-    hiLumNorm[i] = lum;  // we'll re-level below
+    hiLumNorm[i] = 0.299 * r + 0.587 * g + 0.114 * b;
   }
 
-  // Simple re-level based on the current frame
   let lo = 1, hi = 0;
   for (let i = 0; i < HC * H; i += 7) {
     const v = hiLumNorm[i];
@@ -943,7 +921,6 @@ function liveUpdate() {
     hiLumNorm[i] = clamp((hiLumNorm[i] - lo) / span, 0, 1);
   }
 
-  // Cell-level
   for (let cy = 0; cy < R; cy++) for (let cx = 0; cx < C; cx++) {
     let r = 0, g = 0, b = 0;
     for (let j = 0; j < 4; j++) for (let i = 0; i < 2; i++) {
@@ -962,7 +939,7 @@ function liveUpdate() {
 }
 
 /* ============================================================
-   13. Source management
+   Source management
    ============================================================ */
 function stopLive() {
   live = false;
@@ -975,11 +952,7 @@ function stopLive() {
   }
 }
 
-function setImage(im) {
-  stopLive();
-  src = im;
-  build();
-}
+function setImage(im) { stopLive(); src = im; build(); }
 
 function loadImageFile(file) {
   if (!file || !file.type.startsWith('image/')) return;
@@ -1037,7 +1010,7 @@ function startCamera() {
 }
 
 /* ============================================================
-   14. Playback
+   Playback
    ============================================================ */
 function replay() {
   t0 = now();
@@ -1066,11 +1039,13 @@ function showPlaylist(i) {
 }
 
 /* ============================================================
-   15. Main loop
+   Main loop — fixed order, fixed FPS, fixed auto-quality
    ============================================================ */
 function frame(ts) {
   requestAnimationFrame(frame);
   if (!S || (paused && !S.dirty) || ts - lastDraw < 28) return;
+
+  const dtDraw = ts - lastDraw;   // capture BEFORE overwriting
   lastDraw = ts;
   S.dirty = false;
 
@@ -1080,30 +1055,41 @@ function frame(ts) {
 
   if (live && !paused && vid && vid.readyState >= 2) liveUpdate();
 
-  updateParticles(t, dt);
+  // Order matters: compute first, particles overlay on top
   compute(t, dt);
+  updateParticles(t, dt);
   render();
 
-  // FPS / auto quality
-  emaFps = emaFps * 0.92 + (1000 / Math.max(1, ts - lastDraw + 1)) * 0.08;
+  // FPS — proper delta
+  const instantFps = 1000 / Math.max(1, dtDraw);
+  emaFps = emaFps * 0.92 + instantFps * 0.08;
   frameCount++;
   $('fps').textContent = Math.round(emaFps);
 
-  if (frameCount > 45 && emaFps < 19 && !paused && state.autoq && S.C > 100 && ts - lastAdapt > 2500) {
-    lastAdapt = ts;
-    frameCount = 0;
-    emaFps = 60;
-    const nr = Math.max(90, Math.floor(S.C * 0.82 / 10) * 10);
-    state.res = nr;
-    $('res').value = nr;
-    $('res-out').textContent = nr;
-    build();
+  // Auto-quality downscale
+  if (frameCount > 45 && state.autoq && !paused && S.C > 100 && ts - lastAdapt > 2500) {
+    if (emaFps < 25) {
+      lastAdapt = ts;
+      frameCount = 0;
+      const nr = Math.max(90, Math.floor(S.C * 0.82 / 10) * 10);
+      state.res = nr;
+      $('res').value = nr;
+      $('res-out').textContent = nr;
+      build();
+    } else if (emaFps > 58 && S.C < state.res && state.res < 500) {
+      // Recovery: if consistently fast, try bumping up
+      lastAdapt = ts;
+      frameCount = 0;
+      const nr = Math.min(state.res, Math.floor(S.C * 1.15 / 10) * 10);
+      if (nr !== S.C) {
+        $('res').value = nr;
+        $('res-out').textContent = nr;
+        build();
+      }
+    }
   }
 }
 
-/* ============================================================
-   16. HUD
-   ============================================================ */
 function updateHUD() {
   if (!S) return;
   $('hres').textContent = S.C + '×' + S.R;
@@ -1111,19 +1097,21 @@ function updateHUD() {
 }
 
 /* ============================================================
-   17. Presets
+   Presets
    ============================================================ */
+let currentPreset = 'Classic';
+
 function applyPreset(name) {
   const p = PRESETS.find(x => x.name === name);
   if (!p) return;
   Object.assign(state, p.s);
+  currentPreset = name;
   syncUI();
   if (src) build();
   toast('Preset: ' + name);
 }
 
 function syncUI() {
-  // Update UI controls to match state
   const setVal = (id, v) => { const el = $(id); if (el) el.value = v; };
   const setOut = (id, v) => { const el = $(id + '-out'); if (el) el.textContent = v; };
   setVal('mode', state.mode);
@@ -1146,12 +1134,9 @@ function syncUI() {
   setVal('pdensity', Math.round(state.pdensity * 100)); setOut('pdensity', Math.round(state.pdensity * 100));
   $('edges').checked = state.edges;
   $('autoq').checked = state.autoq;
-
-  // Show/hide conditionals
   $('row-charset').style.display = state.mode === 'ascii' ? '' : 'none';
   $('row-pal').style.display = state.color === 'palette' ? '' : 'none';
 
-  // Highlight active preset button
   document.querySelectorAll('#presets button').forEach(b => {
     b.classList.toggle('active', b.dataset.name === currentPreset);
   });
@@ -1159,10 +1144,8 @@ function syncUI() {
   if (S) rebuildParticles();
 }
 
-let currentPreset = 'Classic';
-
 /* ============================================================
-   18. UI wiring
+   UI wiring
    ============================================================ */
 function bindSlider(id, key, mult, fmt) {
   const el = $(id), out = $(id + '-out');
@@ -1191,7 +1174,6 @@ function markCustom() {
 }
 
 function initUI() {
-  // Charsets
   const cs = $('charset');
   for (const k in CHARSETS) {
     const o = document.createElement('option');
@@ -1200,7 +1182,6 @@ function initUI() {
   }
   cs.value = state.charset;
 
-  // Palettes
   const ps = $('pal');
   for (const k in PALETTES) {
     const o = document.createElement('option');
@@ -1209,17 +1190,15 @@ function initUI() {
   }
   ps.value = state.pal;
 
-  // Presets
   const pr = $('presets');
   for (const p of PRESETS) {
     const b = document.createElement('button');
     b.textContent = p.name;
     b.dataset.name = p.name;
-    b.addEventListener('click', () => { currentPreset = p.name; applyPreset(p.name); });
+    b.addEventListener('click', () => applyPreset(p.name));
     pr.appendChild(b);
   }
 
-  // Sliders
   bindSlider('res', 'res', 1, v => v);
   bindSlider('bright', 'bright', 100, v => v.toFixed(2));
   bindSlider('contrast', 'contrast', 100, v => v.toFixed(2));
@@ -1234,10 +1213,11 @@ function initUI() {
   bindSlider('speed', 'speed', 100, v => v.toFixed(2));
   bindSlider('pdensity', 'pdensity', 100, v => Math.round(v * 100));
 
-  // Res specific: rebuild
+  // Density requires particle rebuild
+  $('pdensity').addEventListener('change', () => { if (S) rebuildParticles(); });
+  // Resolution requires full rebuild
   $('res').addEventListener('change', () => { if (src) build(); });
 
-  // Selects
   bindSelect('mode', 'mode', () => {
     $('row-charset').style.display = state.mode === 'ascii' ? '' : 'none';
     if (S) { S.glyphs = getActiveChars(); spriteAtlasReset(); }
@@ -1250,17 +1230,14 @@ function initUI() {
   bindSelect('font', 'font', () => { if (S) layout(); });
   bindSelect('ptype', 'ptype', () => { if (S) rebuildParticles(); });
 
-  // Checkboxes
   $('edges').addEventListener('change', () => { state.edges = $('edges').checked; if (S) S.dirty = true; markCustom(); });
   $('autoq').addEventListener('change', () => { state.autoq = $('autoq').checked; markCustom(); });
 
-  // Custom chars
   $('custom-chars').addEventListener('input', () => {
     state.customChars = $('custom-chars').value;
     if (S) { S.glyphs = getActiveChars(); spriteAtlasReset(); }
   });
 
-  // Buttons
   $('btn-open').addEventListener('click', () => $('file-img').click());
   $('btn-video').addEventListener('click', () => $('file-vid').click());
   $('btn-cam').addEventListener('click', startCamera);
@@ -1270,7 +1247,6 @@ function initUI() {
   $('btn-help').addEventListener('click', () => $('help').classList.add('show'));
   $('help-close').addEventListener('click', () => $('help').classList.remove('show'));
 
-  // Files
   $('file-img').addEventListener('change', e => loadImageFiles(e.target.files));
   $('file-vid').addEventListener('change', e => {
     const f = e.target.files[0];
@@ -1281,22 +1257,19 @@ function initUI() {
     goLive(v, false);
   });
 
-  // Toggle panel
   $('toggle').addEventListener('click', () => $('panel').classList.toggle('open'));
 
-  // Export
   $('btn-png').addEventListener('click', exportPNG);
   $('btn-txt').addEventListener('click', exportTXT);
   $('btn-webm').addEventListener('click', toggleRecord);
   $('btn-json').addEventListener('click', exportJSON);
 
-  // Resize
   addEventListener('resize', layout);
   addEventListener('orientationchange', () => setTimeout(layout, 100));
 }
 
 /* ============================================================
-   19. Export
+   Export
    ============================================================ */
 function download(filename, blob) {
   const url = URL.createObjectURL(blob);
@@ -1306,28 +1279,29 @@ function download(filename, blob) {
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
-function exportPNG() {
-  if (!canvas) return;
-  // Composite main + fx
+function compositeCanvas() {
   const out = document.createElement('canvas');
   out.width = canvas.width; out.height = canvas.height;
   const octx = out.getContext('2d');
   octx.drawImage(canvas, 0, 0);
   octx.drawImage(fxCanvas, 0, 0);
-  out.toBlob(b => { if (b) { download('ascii-buildme.png', b); toast('PNG saved'); } }, 'image/png');
+  return out;
+}
+
+function exportPNG() {
+  if (!canvas) return;
+  compositeCanvas().toBlob(b => {
+    if (b) { download('ascii-buildme.png', b); toast('PNG saved'); }
+  }, 'image/png');
 }
 
 function exportTXT() {
   if (!S) return;
-  const { C, R, gi } = S;
-  const glyphs = S.glyphs;
+  const { C, R, gi, glyphs } = S;
   let out = '';
   for (let r = 0; r < R; r++) {
     let line = '';
-    for (let c = 0; c < C; c++) {
-      const g = gi[r * C + c];
-      line += glyphs[g] || ' ';
-    }
+    for (let c = 0; c < C; c++) line += glyphs[gi[r * C + c]] || ' ';
     out += line + '\n';
   }
   download('ascii-buildme.txt', new Blob([out], { type: 'text/plain' }));
@@ -1335,20 +1309,43 @@ function exportTXT() {
 }
 
 function exportJSON() {
-  const cfg = { ...state, version: 'ultra-1' };
+  const cfg = { ...state, version: 'ultra-2' };
   download('ascii-buildme.json', new Blob([JSON.stringify(cfg, null, 2)], { type: 'application/json' }));
   toast('Config saved');
+}
+
+function startRecComposite() {
+  stopRecComposite();
+  recComp = document.createElement('canvas');
+  recComp.width = canvas.width;
+  recComp.height = canvas.height;
+  recCompCtx = recComp.getContext('2d');
+  const draw = () => {
+    if (!recComp) return;
+    recCompCtx.drawImage(canvas, 0, 0);
+    recCompCtx.drawImage(fxCanvas, 0, 0);
+    recRafHandle = requestAnimationFrame(draw);
+  };
+  draw();
+  return recComp;
+}
+
+function stopRecComposite() {
+  if (recRafHandle) cancelAnimationFrame(recRafHandle);
+  recRafHandle = null;
+  recComp = null;
+  recCompCtx = null;
 }
 
 function toggleRecord() {
   const btn = $('btn-webm');
   if (recorder) { recorder.stop(); return; }
-  if (!canvas.captureStream || !window.MediaRecorder) {
-    toast('Recording not supported here'); return;
-  }
+  if (!window.MediaRecorder) { toast('Recording not supported here'); return; }
+  const target = startRecComposite();
+  if (!target.captureStream) { stopRecComposite(); toast('captureStream unsupported'); return; }
   const types = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
   const mt = types.find(t => MediaRecorder.isTypeSupported(t));
-  const stream = canvas.captureStream(30);
+  const stream = target.captureStream(30);
   const parts = [];
   recorder = new MediaRecorder(stream, mt ? { mimeType: mt, videoBitsPerSecond: 8e6 } : {});
   recorder.ondataavailable = e => { if (e.data.size) parts.push(e.data); };
@@ -1357,6 +1354,7 @@ function toggleRecord() {
     btn.textContent = 'Record WebM';
     const blob = new Blob(parts, { type: 'video/webm' });
     recorder = null;
+    stopRecComposite();
     if (blob.size) { download('ascii-buildme.webm', blob); toast('WebM saved'); }
   };
   recorder.start(500);
@@ -1365,7 +1363,7 @@ function toggleRecord() {
 }
 
 /* ============================================================
-   20. Keyboard
+   Keyboard
    ============================================================ */
 function bindKeyboard() {
   addEventListener('keydown', e => {
@@ -1396,13 +1394,13 @@ function bindKeyboard() {
     else if (e.key === 'Escape') $('help').classList.remove('show');
     else if (e.key >= '1' && e.key <= '9') {
       const idx = parseInt(e.key) - 1;
-      if (PRESETS[idx]) { currentPreset = PRESETS[idx].name; applyPreset(PRESETS[idx].name); }
+      if (PRESETS[idx]) applyPreset(PRESETS[idx].name);
     }
   });
 }
 
 /* ============================================================
-   21. Pointer & drag/drop
+   Pointer & drag/drop
    ============================================================ */
 function bindPointer() {
   canvas.addEventListener('pointermove', e => {
@@ -1423,13 +1421,11 @@ function bindPointer() {
   canvas.addEventListener('pointerleave', () => { ptr.on = false; });
   canvas.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') ptr.on = false; });
 
-  // Ramp pointer brightness toward target
   setInterval(() => {
     ptr.a += ((ptr.on ? 1 : 0) - ptr.a) * 0.2;
     ptr.b *= 0.94;
   }, 50);
 
-  // Drag & drop
   const dz = $('dropzone');
   ['dragenter', 'dragover'].forEach(ev => addEventListener(ev, e => {
     e.preventDefault(); dz.classList.add('show');
@@ -1439,7 +1435,6 @@ function bindPointer() {
   }));
   addEventListener('drop', e => loadImageFiles(e.dataTransfer.files));
 
-  // Paste
   addEventListener('paste', e => {
     for (const item of e.clipboardData.items) {
       if (item.type.startsWith('image/')) loadImageFile(item.getAsFile());
@@ -1448,7 +1443,7 @@ function bindPointer() {
 }
 
 /* ============================================================
-   22. Demo image (procedural — no external data)
+   Demo image
    ============================================================ */
 function makeDemoImage() {
   const c = document.createElement('canvas');
@@ -1486,7 +1481,7 @@ function makeDemoImage() {
 }
 
 /* ============================================================
-   23. Bootstrap
+   Bootstrap
    ============================================================ */
 function init() {
   initUI();
@@ -1496,14 +1491,12 @@ function init() {
   makeDemoImage();
   requestAnimationFrame(frame);
 
-  // Slideshow timer (only when multiple images and not paused)
   setInterval(() => {
     if (playlist.length > 1 && !paused && !live && now() - slideTimer > 8000) {
       showPlaylist(pi + 1);
     }
   }, 500);
 
-  // Initial toast
   setTimeout(() => toast('Press H for controls · ? for help', 2600), 500);
 }
 
